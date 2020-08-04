@@ -106,6 +106,7 @@
       this._cameraObj.object3D.getWorldDirection(this.cameraDir)
       this.el.object3D.getWorldPosition(this.playCenter)
       this.playerPos.set(this.cameraPos.x, this.playCenter.y - this.floorOffset, this.cameraPos.z)
+      if (this.cameraPos.y < this.playerPos.y) this.toggleCrouch()
 
       delta.set(this.safePos.x - this.playerPos.x, this.safePos.y - this.playerPos.y, this.safePos.z - this.playerPos.z)
       this._bumper.object3D.position.copy(delta)
@@ -268,12 +269,16 @@
     enableHands: function() {
       let _cursor = this._camera.querySelector("a-cursor")
       if (_cursor) {
-        this._cursor.flushToDOM(true)
-        let cursor = this._cursor.cloneNode(true)
-        this._rightHand.appendChild(cursor)
         this._camera.removeChild(_cursor)
-        this._cursor = cursor
+
+        this._cursor = this._rightHand.ensure("a-cursor.locomotion", "a-cursor", {
+          autoRefresh: false,
+          class: "locomotion",
+          objects: "[floor], [wall]",
+          position: { x: 0, y: 0, z: 0 }
+        })
         this._cursorBall = this._cursor.ensure("a-sphere", "a-sphere", { radius: 0.0625, color: "#0ff", visible: false })
+
         this._rightHand.removeEventListener("buttonchanged", this.enableHands)
         this.hasHands = true
         console.log("Hands are enabled!")
@@ -284,7 +289,7 @@
       if (this.floorOffset) {
         this.floorOffset = 0
         this._vehicle.object3D.position.y = 0.5
-        this.moveTo(this.playerPos.x, this.playerPos.y + .6, this.playerPos.z)
+        this.moveTo(this.playerPos.x, this.playerPos.y + 1, this.playerPos.z)
       } else {
         this.floorOffset = -1
         this._vehicle.object3D.position.y = 0.5 - this.floorOffset
