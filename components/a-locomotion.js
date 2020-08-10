@@ -1,6 +1,6 @@
 /* global AFRAME, THREE */
 
-;(function() {
+; (function () {
   AFRAME.registerComponent("locomotion", {
     schema: {
       acceleration: { type: "number", default: 65 },
@@ -10,7 +10,7 @@
       teleportDistance: { type: "number", default: 3 }
     },
 
-    init: function() {
+    init: function () {
       // Do something when component first attached.
       this.playCenter = new THREE.Vector3()
       this.playerPos = new THREE.Vector3()
@@ -25,8 +25,9 @@
       this._leftHand = this.el.querySelector(".left-hand")
       this._rightHand = this.el.querySelector(".right-hand")
       this._cursor = this._camera.ensure("a-cursor.locomotion", "a-cursor", {
-        autoRefresh: false,
         class: "locomotion",
+        raycaster: { origin: { x: 0, y: 0, z: 0.5 } },
+        autoRefresh: false,
         objects: "[floor], [wall]",
         position: { x: 0, y: 0, z: -0.5 }
       })
@@ -67,7 +68,7 @@
       console.log("Player initialized!")
     },
 
-    update: function() {
+    update: function () {
       // Do something when component's data is updated.
       this._camera.setAttribute("wasd-controls", "acceleration", this.data.acceleration)
       let pos = this.el.getAttribute("position")
@@ -78,7 +79,7 @@
       console.log("Player updated!", this.data)
     },
 
-    remove: function() {
+    remove: function () {
       // Do something the component or its entity is detached.
       this._rightHand.removeEventListener("buttonchanged", this.enableHands)
       this._leftHand.removeEventListener("axismove", this._axisMove)
@@ -93,7 +94,7 @@
       console.log("Player removed!")
     },
 
-    tick: function(time, timeDelta) {
+    tick: function (time, timeDelta) {
       let dir = THREE.Vector2.new()
       let camdir = THREE.Vector2.new()
       let pivot = THREE.Vector2.new()
@@ -192,7 +193,7 @@
         this._cursor.components.raycaster.refreshObjects()
         let ray = this._cursor.components.raycaster
         let int = ray.intersections[0]
-        this._cursorBall.object3D.position.set(0, 0, int && -int.distance)
+        this._cursorBall.object3D.position.set(0, 0, int && -int.distance + this._cursor.components.raycaster.data.origin.z)
 
         if (int && int.object.el.getAttribute("floor") != null && int.point.y < this.playerPos.y + 1.5) {
           this._cursorBall.setAttribute("color", "#0f0")
@@ -240,7 +241,7 @@
       this.moveTo(this.playerPos.x + dir.x, this.playerPos.y, this.playerPos.z + dir.y)
     },
 
-    moveTo: function(x, y, z, safe) {
+    moveTo: function (x, y, z, safe) {
       let delta = THREE.Vector3.new()
       if (safe) this.safePos.set(x, y, z)
       delta.set(x - this.playerPos.x, y - this.playerPos.y, z - this.playerPos.z)
@@ -251,7 +252,7 @@
       this.el.object3D.position.add(delta)
     },
 
-    rotateBy: function(angle) {
+    rotateBy: function (angle) {
       let pos = THREE.Vector2.new()
       let pivot = THREE.Vector2.new()
       let delta = THREE.Vector3.new()
@@ -266,7 +267,7 @@
       this.playCenter.add(delta)
     },
 
-    enableHands: function() {
+    enableHands: function () {
       let _cursor = this._camera.querySelector("a-cursor")
       if (_cursor) {
         this._camera.removeChild(_cursor)
@@ -285,7 +286,7 @@
       }
     },
 
-    toggleCrouch: function() {
+    toggleCrouch: function () {
       if (this.floorOffset) {
         this.floorOffset = 0
         this._vehicle.object3D.position.y = 0.5
@@ -296,7 +297,7 @@
       }
     },
 
-    _axisMove: function(e) {
+    _axisMove: function (e) {
       this._axes = this._axes || []
       if (e.srcElement.getAttribute("hand-controls").hand === "left") {
         this._axes[0] = e.detail.axis[2]
@@ -307,7 +308,7 @@
       }
     },
 
-    _buttonChanged: function(e) {
+    _buttonChanged: function (e) {
       // console.log(e.detail.id, e.detail.state.pressed)
       if (e.srcElement.getAttribute("hand-controls").hand === "left") {
         if (e.detail.id == 3 && e.detail.state.pressed) this.data.quantizeMovement = !this.data.quantizeMovement
@@ -316,19 +317,19 @@
       }
     },
 
-    _fireDown: function(e) {
+    _fireDown: function (e) {
       this._axes = this._axes || [0, 0, 0, 0]
       this._alt = this._alt || 0
       this._axes[3] = -1
     },
 
-    _fireUp: function(e) {
+    _fireUp: function (e) {
       this._axes = this._axes || [0, 0, 0, 0]
       this._alt = this._alt || 0
       this._axes[3] = 0
     },
 
-    _keyDown: function(e) {
+    _keyDown: function (e) {
       if (e.code == "Space") {
         this._axes = this._axes || [0, 0, 0, 0]
         this._alt = this._alt || 0
@@ -339,7 +340,7 @@
       }
     },
 
-    _keyUp: function(e) {
+    _keyUp: function (e) {
       if (e.code == "Space" && this._axes) {
         this._axes[3] = 0
       }
@@ -351,7 +352,7 @@
       staticBody: { type: "boolean", default: true }
     },
 
-    update: function() {
+    update: function () {
       // Do something when component's data is updated.
       if (this.data.staticBody) {
         if (!this.el.getAttribute("static-body")) this.el.setAttribute("static-body", "")
@@ -366,7 +367,7 @@
       staticBody: { type: "boolean", default: true }
     },
 
-    update: function() {
+    update: function () {
       // Do something when component's data is updated.
       if (this.data.staticBody) {
         if (!this.el.getAttribute("static-body")) this.el.setAttribute("static-body", "")
