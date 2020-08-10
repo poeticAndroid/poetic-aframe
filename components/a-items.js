@@ -1,10 +1,10 @@
 /* global AFRAME, THREE */
 
-;(function() {
+; (function () {
   AFRAME.registerComponent("grabber", {
     schema: {},
 
-    init: function() {
+    init: function () {
       // Do something when component first attached.
       this.el.ensurePlayer()
       this._camera = this.el.querySelector("a-camera")
@@ -79,12 +79,12 @@
       console.log("grabber initialized!")
     },
 
-    update: function() {
+    update: function () {
       // Do something when component's data is updated.
       console.log("grabber updated!", this.data)
     },
 
-    remove: function() {
+    remove: function () {
       // Do something the component or its entity is detached.
       this._leftHand.removeEventListener("buttonchanged", this.enableHands)
       this._rightHand.removeEventListener("buttonchanged", this.enableHands)
@@ -104,7 +104,7 @@
       console.log("grabber removed!")
     },
 
-    tick: function(time, timeDelta) {
+    tick: function (time, timeDelta) {
       // Do something on every scene tick or frame.
       let i, len, gamepad
       this._gamepadDelta = this._gamepadDelta || []
@@ -130,10 +130,7 @@
         this.grabbed.object3D.getWorldPosition(pos1)
         this.grabbed.copyWorldPosRot(this._anchor)
         this.grabbed.object3D.getWorldPosition(pos2)
-        delta
-          .copy(pos1)
-          .sub(pos2)
-          .multiplyScalar(-1000 / timeDelta)
+        delta.copy(pos2).sub(pos1).multiplyScalar(512 / timeDelta)
 
         if (this.grabbed.body) {
           this.grabbed.body.sleep()
@@ -145,10 +142,7 @@
         this.leftGrabbed.object3D.getWorldPosition(pos1)
         this.leftGrabbed.copyWorldPosRot(this._leftAnchor)
         this.leftGrabbed.object3D.getWorldPosition(pos2)
-        delta
-          .copy(pos1)
-          .sub(pos2)
-          .multiplyScalar(-1000 / timeDelta)
+        delta.copy(pos2).sub(pos1).multiplyScalar(512 / timeDelta)
 
         if (this.leftGrabbed.body) {
           this.leftGrabbed.body.sleep()
@@ -160,10 +154,7 @@
         this.rightGrabbed.object3D.getWorldPosition(pos1)
         this.rightGrabbed.copyWorldPosRot(this._rightAnchor)
         this.rightGrabbed.object3D.getWorldPosition(pos2)
-        delta
-          .copy(pos1)
-          .sub(pos2)
-          .multiplyScalar(-1000 / timeDelta)
+        delta.copy(pos2).sub(pos1).multiplyScalar(512 / timeDelta)
 
         if (this.rightGrabbed.body) {
           this.rightGrabbed.body.sleep()
@@ -173,7 +164,7 @@
       }
     },
 
-    enableHands: function() {
+    enableHands: function () {
       if (this._ray) {
         this._camera.removeChild(this._ray)
         this._ray = null
@@ -183,18 +174,18 @@
         console.log("Hands are enabled!")
       }
     },
-    emit: function(eventtype, hand, grabbed) {
+    emit: function (eventtype, hand, grabbed) {
       console.log("emitting", eventtype)
       hand.emit(eventtype)
       if (grabbed) grabbed.emit(eventtype)
     },
 
-    toggleGrab: function() {
+    toggleGrab: function () {
       if (this.grabbed) this.drop()
       else this.grab()
     },
 
-    grab: function() {
+    grab: function () {
       let ray = this._ray.components.raycaster
       this._ray.components.raycaster.refreshObjects()
       let int = ray.intersections[0]
@@ -210,17 +201,12 @@
           this._anchor.object3D.position.set(0, -0.25, -0.5)
           this._anchor.object3D.quaternion.set(0, 0, 0, 1)
         }
-        if (this.grabbed.body) {
-          this.grabbed.body.velocity.set(0, 0, 0)
-          this.grabbed.body.angularVelocity.set(0, 0, 0)
-          this.grabbed.body.sleep()
-        }
-        this.emit("grab", this._camera, this.grabbed)
         console.log("I got something!", this.grabbed)
       }
+      this.emit("grab", this._camera, this.grabbed)
       console.log("Grabbing!")
     },
-    use: function() {
+    use: function () {
       if (this._useed) {
         clearTimeout(this._useed)
         this.emit("useup", this._camera, this.grabbed)
@@ -232,13 +218,13 @@
         this._useed = null
       }, 256)
     },
-    useDown: function() {
+    useDown: function () {
       this.emit("usedown", this._camera, this.grabbed)
     },
-    useUp: function() {
+    useUp: function () {
       this.emit("useup", this._camera, this.grabbed)
     },
-    drop: function() {
+    drop: function () {
       if (this.grabbed) {
         if (this.grabbed.body) {
           this.grabbed.body.wakeUp()
@@ -250,7 +236,7 @@
       console.log("Dropping!")
     },
 
-    leftGrab: function() {
+    leftGrab: function () {
       let ray = this._leftRay.components.raycaster
       this._leftRay.components.raycaster.refreshObjects()
       let int = ray.intersections[0]
@@ -264,24 +250,19 @@
           this._leftAnchor.object3D.position.set(0, 0, 0)
           this._leftAnchor.object3D.quaternion.set(0, 0, 0, 1)
         }
-        if (this.leftGrabbed.body) {
-          this.leftGrabbed.body.velocity.set(0, 0, 0)
-          this.leftGrabbed.body.angularVelocity.set(0, 0, 0)
-          this.leftGrabbed.body.sleep()
-        }
         this._leftHand.object3D.visible = false
-        this.emit("grab", this._leftHand, this.leftGrabbed)
         console.log("I got something!", this.leftGrabbed)
       }
+      this.emit("grab", this._leftHand, this.leftGrabbed)
       console.log("Grabbing!")
     },
-    leftUseDown: function() {
+    leftUseDown: function () {
       this.emit("usedown", this._leftHand, this.leftGrabbed)
     },
-    leftUseUp: function() {
+    leftUseUp: function () {
       this.emit("useup", this._leftHand, this.leftGrabbed)
     },
-    leftDrop: function() {
+    leftDrop: function () {
       if (this.leftGrabbed) {
         if (this.leftGrabbed.body) {
           this.leftGrabbed.body.wakeUp()
@@ -293,7 +274,7 @@
       console.log("Dropping!")
     },
 
-    rightGrab: function() {
+    rightGrab: function () {
       let ray = this._rightRay.components.raycaster
       this._rightRay.components.raycaster.refreshObjects()
       let int = ray.intersections[0]
@@ -307,24 +288,19 @@
           this._rightAnchor.object3D.position.set(0, 0, 0)
           this._rightAnchor.object3D.quaternion.set(0, 0, 0, 1)
         }
-        if (this.rightGrabbed.body) {
-          this.rightGrabbed.body.velocity.set(0, 0, 0)
-          this.rightGrabbed.body.angularVelocity.set(0, 0, 0)
-          this.rightGrabbed.body.sleep()
-        }
         this._rightHand.object3D.visible = false
-        this.emit("grab", this._rightHand, this.rightGrabbed)
         console.log("I got something!", this.rightGrabbed)
       }
+      this.emit("grab", this._rightHand, this.rightGrabbed)
       console.log("Grabbing!")
     },
-    rightUseDown: function() {
+    rightUseDown: function () {
       this.emit("usedown", this._rightHand, this.rightGrabbed)
     },
-    rightUseUp: function() {
+    rightUseUp: function () {
       this.emit("useup", this._rightHand, this.rightGrabbed)
     },
-    rightDrop: function() {
+    rightDrop: function () {
       if (this.rightGrabbed) {
         if (this.rightGrabbed.body) {
           this.rightGrabbed.body.wakeUp()
@@ -336,7 +312,7 @@
       console.log("Dropping!")
     },
 
-    _keyDown: function(e) {
+    _keyDown: function (e) {
       if (e.code == "KeyE") this.toggleGrab()
     }
   })
@@ -346,7 +322,7 @@
       dynamicBody: { type: "boolean", default: true }
     },
 
-    update: function() {
+    update: function () {
       // Do something when component's data is updated.
       if (this.data.dynamicBody) {
         if (!this.el.getAttribute("dynamic-body")) this.el.setAttribute("dynamic-body", "")
