@@ -2,6 +2,7 @@
 
 ; (function () {
   AFRAME.registerComponent("locomotion", {
+    dependencies: ["position"],
     schema: {
       acceleration: { type: "number", default: 65 },
       rotationSpeed: { type: "number", default: 1 },
@@ -241,6 +242,15 @@
       this.moveTo(this.playerPos.x + dir.x, this.playerPos.y, this.playerPos.z + dir.y)
     },
 
+    moveBy: function (x, z) {
+      let delta = THREE.Vector3.new()
+      delta.set(x, 0, z)
+
+      this.playCenter.add(delta)
+      this.playerPos.add(delta)
+      this.cameraPos.add(delta)
+      this.el.object3D.position.add(delta)
+    },
     moveTo: function (x, y, z, safe) {
       let delta = THREE.Vector3.new()
       if (safe) this.safePos.set(x, y, z)
@@ -354,11 +364,9 @@
 
     update: function () {
       // Do something when component's data is updated.
-      if (this.data.staticBody) {
-        if (!this.el.getAttribute("static-body")) this.el.setAttribute("static-body", "")
-      } else {
-        this.el.removeAttribute("static-body")
-      }
+      if (this.data.staticBody && !this.el.getAttribute("static-body"))
+        this.el.setAttribute("static-body", "")
+
       console.log("floor updated!", this.data)
     }
   })
@@ -369,11 +377,9 @@
 
     update: function () {
       // Do something when component's data is updated.
-      if (this.data.staticBody) {
-        if (!this.el.getAttribute("static-body")) this.el.setAttribute("static-body", "")
-      } else {
-        this.el.removeAttribute("static-body")
-      }
+      if (this.data.staticBody && !this.el.getAttribute("static-body"))
+        this.el.setAttribute("static-body", "")
+
       console.log("wall updated!", this.data)
     }
   })

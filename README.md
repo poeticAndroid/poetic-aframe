@@ -3,12 +3,16 @@
 ```html
 <script type="text/javascript" src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
 <script type="text/javascript" src="https://cdn.rawgit.com/donmccurdy/aframe-physics-system/v4.0.1/dist/aframe-physics-system.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.4/components/utils.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.4/components/a-locomotion.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.4/components/a-items.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.5/components/utils.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.5/components/a-tiledwalls.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.5/components/a-locomotion.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.5/components/a-items.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.5/components/a-door.js"></script>
 ```
 
 ## Documentation
 
-- [a-locomotion.md](https://github.com/poeticAndroid/poetic-aframe/blob/master/components/a-locomotion.md)
-- [a-items.md](https://github.com/poeticAndroid/poetic-aframe/blob/master/components/a-items.md)
+- [a-tiledwalls.js](https://github.com/poeticAndroid/poetic-aframe/blob/master/components/a-tiledwalls.md)
+- [a-locomotion.js](https://github.com/poeticAndroid/poetic-aframe/blob/master/components/a-locomotion.md)
+- [a-items.js](https://github.com/poeticAndroid/poetic-aframe/blob/master/components/a-items.md)
+- [a-door.js](https://github.com/poeticAndroid/poetic-aframe/blob/master/components/a-door.md)

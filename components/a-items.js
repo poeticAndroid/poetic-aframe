@@ -324,11 +324,9 @@
 
     update: function () {
       // Do something when component's data is updated.
-      if (this.data.dynamicBody) {
-        if (!this.el.getAttribute("dynamic-body")) this.el.setAttribute("dynamic-body", "")
-      } else {
-        this.el.removeAttribute("dynamic-body")
-      }
+      if (this.data.dynamicBody && !this.el.getAttribute("dynamic-body"))
+        this.el.setAttribute("dynamic-body", "")
+
       console.log("grabbable updated!", this.data)
     }
   })
