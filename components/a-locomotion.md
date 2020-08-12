@@ -32,6 +32,15 @@ This makes it possible to move around the using the following controls.
 | quantizeRotation | Quantize rotation              | true    |
 | teleportDistance | Maximum teleportation distance | 3       |
 
+### Methods
+
+| Method              | Description                                                           |
+|---------------------|-----------------------------------------------------------------------|
+| moveBy(x,z)         | Move by given distance on X and Z axes.                               |
+| moveTo(x,y,z, safe) | Move to given position. Ignore walls in the way, if `safe` is `true`. |
+| rotateBy(angle)     | Rotate by given angle.                                                |
+| toggleCrouch()      | Toggle crouch mode.                                                   |
+
 
 floor
 -----
