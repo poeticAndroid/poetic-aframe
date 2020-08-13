@@ -72,11 +72,15 @@
     update: function () {
       // Do something when component's data is updated.
       this._camera.setAttribute("wasd-controls", "acceleration", this.data.acceleration)
-      let pos = this.el.getAttribute("position")
+      let pos = JSON.parse(JSON.stringify(this.el.getAttribute("position")))
       console.log("i got pos", pos)
-      setTimeout(() => {
+      let to = setInterval(() => {
         this.moveTo(pos.x, pos.y, pos.z, true)
       }, 1024)
+      setTimeout(() => {
+        clearInterval(to)
+        if (this.floorOffset) this.toggleCrouch()
+      }, 3000)
       console.log("Player updated!", this.data)
     },
 
@@ -299,7 +303,7 @@
     toggleCrouch: function () {
       if (this.floorOffset) {
         this.floorOffset = 0
-        this._vehicle.object3D.position.y = 0.5
+        this._vehicle.object3D.position.y = 0.5 - this.floorOffset
         this.moveTo(this.playerPos.x, this.playerPos.y + 1, this.playerPos.z)
       } else {
         this.floorOffset = -1

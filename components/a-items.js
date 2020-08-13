@@ -11,7 +11,12 @@
       this._cameraObj = this._camera.querySelector(".tracker")
       this._leftHand = this.el.querySelector(".left-hand")
       this._rightHand = this.el.querySelector(".right-hand")
-      this._ray = this._camera.ensure(".items-ray", "a-entity", {
+      this._hands = ["head", "left", "right"]
+      this._head = { hand: this._camera }
+      this._left = { hand: this._leftHand }
+      this._right = { hand: this._rightHand }
+
+      this._head.ray = this._camera.ensure(".items-ray", "a-entity", {
         class: "items-ray",
         raycaster: {
           objects: "[grabbable]",
@@ -19,63 +24,69 @@
           autoRefresh: false
         }
       })
-      this._leftRay = this._leftHand.ensure(".items-ray", "a-entity", {
+      let dia = Math.sin(Math.PI / 4)
+      this._left.ray = this._leftHand.ensure(".items-ray", "a-entity", {
         class: "items-ray",
         raycaster: {
           objects: "[grabbable]",
-          far: 0.125,
-          origin: { x: -0.0625, y: 0, z: 0 },
-          direction: { x: 1, y: 0, z: 0 },
+          far: 0.2,
+          origin: { x: -0.0625, y: 0, z: 0.0625 },
+          direction: { x: dia, y: 0, z: -dia },
           autoRefresh: false
         }
       })
-      this._rightRay = this._rightHand.ensure(".items-ray", "a-entity", {
+      this._right.ray = this._rightHand.ensure(".items-ray", "a-entity", {
         class: "items-ray",
         raycaster: {
           objects: "[grabbable]",
-          far: 0.125,
-          origin: { x: 0.0625, y: 0, z: 0 },
-          direction: { x: -1, y: 0, z: 0 },
+          far: 0.2,
+          origin: { x: 0.0625, y: 0, z: 0.0625 },
+          direction: { x: -dia, y: 0, z: -dia },
           autoRefresh: false
         }
       })
-      this._anchor = this._ray.ensure(".items-anchor", "a-entity", { class: "items-anchor" })
-      this._leftAnchor = this._leftRay.ensure(".items-anchor", "a-entity", { class: "items-anchor" })
-      this._rightAnchor = this._rightRay.ensure(".items-anchor", "a-entity", { class: "items-anchor" })
+      this._head.anchor = this._head.ray.ensure(".items-anchor", "a-entity", { class: "items-anchor" })
+      this._left.anchor = this._left.ray.ensure(".items-anchor", "a-entity", { class: "items-anchor" })
+      this._right.anchor = this._right.ray.ensure(".items-anchor", "a-entity", { class: "items-anchor" })
 
       this.enableHands = this.enableHands.bind(this)
       this._keyDown = this._keyDown.bind(this)
-      this.toggleGrab = this.toggleGrab.bind(this)
-      this.grab = this.grab.bind(this)
-      this.use = this.use.bind(this)
-      this.useDown = this.useDown.bind(this)
-      this.useUp = this.useUp.bind(this)
-      this.drop = this.drop.bind(this)
-      this.leftGrab = this.leftGrab.bind(this)
-      this.leftUseDown = this.leftUseDown.bind(this)
-      this.leftUseUp = this.leftUseUp.bind(this)
-      this.leftDrop = this.leftDrop.bind(this)
-      this.rightGrab = this.rightGrab.bind(this)
-      this.rightUseDown = this.rightUseDown.bind(this)
-      this.rightUseUp = this.rightUseUp.bind(this)
-      this.rightDrop = this.rightDrop.bind(this)
+      this._head.toggleGrab = () => { this.toggleGrab("head") }
+      this._head.grab = () => { this.grab("head") }
+      this._head.use = () => { this.use("head") }
+      this._head.useDown = () => { this.useDown("head") }
+      this._head.useUp = () => { this.useUp("head") }
+      this._head.drop = () => { this.drop("head") }
+      this._left.toggleGrab = () => { this.toggleGrab("left") }
+      this._left.grab = () => { this.grab("left") }
+      this._left.use = () => { this.use("left") }
+      this._left.useDown = () => { this.useDown("left") }
+      this._left.useUp = () => { this.useUp("left") }
+      this._left.drop = () => { this.drop("left") }
+      this._right.toggleGrab = () => { this.toggleGrab("right") }
+      this._right.grab = () => { this.grab("right") }
+      this._right.use = () => { this.use("right") }
+      this._right.useDown = () => { this.useDown("right") }
+      this._right.useUp = () => { this.useUp("right") }
+      this._right.drop = () => { this.drop("right") }
 
       this._leftHand.addEventListener("buttonchanged", this.enableHands)
       this._rightHand.addEventListener("buttonchanged", this.enableHands)
-      this._leftHand.addEventListener("gripdown", this.leftGrab)
-      this._leftHand.addEventListener("triggerdown", this.leftUseDown)
-      this._leftHand.addEventListener("triggerup", this.leftUseUp)
-      this._leftHand.addEventListener("gripup", this.leftDrop)
-      this._rightHand.addEventListener("gripdown", this.rightGrab)
-      this._rightHand.addEventListener("triggerdown", this.rightUseDown)
-      this._rightHand.addEventListener("triggerup", this.rightUseUp)
-      this._rightHand.addEventListener("gripup", this.rightDrop)
+      this._leftHand.addEventListener("gripdown", this._left.grab)
+      this._leftHand.addEventListener("triggerdown", this._left.useDown)
+      this._leftHand.addEventListener("triggerup", this._left.useUp)
+      this._leftHand.addEventListener("gripup", this._left.drop)
+      this._rightHand.addEventListener("gripdown", this._right.grab)
+      this._rightHand.addEventListener("triggerdown", this._right.useDown)
+      this._rightHand.addEventListener("triggerup", this._right.useUp)
+      this._rightHand.addEventListener("gripup", this._right.drop)
       addEventListener("keydown", this._keyDown)
-      document.querySelector("canvas").addEventListener("mousedown", this.useDown)
-      document.querySelector("canvas").addEventListener("mouseup", this.useUp)
-      document.querySelector("canvas").addEventListener("hold", this.toggleGrab)
-      document.querySelector("canvas").addEventListener("tap", this.use)
+      document.querySelector("canvas").addEventListener("mousedown", this._head.useDown)
+      document.querySelector("canvas").addEventListener("mouseup", this._head.useUp)
+      document.querySelector("canvas").addEventListener("hold", this._head.toggleGrab)
+      document.querySelector("canvas").addEventListener("tap", this._head.use)
 
+      this._wildItem = 0
       console.log("grabber initialized!")
     },
 
@@ -88,19 +99,19 @@
       // Do something the component or its entity is detached.
       this._leftHand.removeEventListener("buttonchanged", this.enableHands)
       this._rightHand.removeEventListener("buttonchanged", this.enableHands)
-      this._leftHand.removeEventListener("gripdown", this.leftGrab)
-      this._leftHand.removeEventListener("triggerdown", this.leftUseDown)
-      this._leftHand.removeEventListener("triggerup", this.leftUseUp)
-      this._leftHand.removeEventListener("gripup", this.leftDrop)
-      this._rightHand.removeEventListener("gripdown", this.rightGrab)
-      this._rightHand.removeEventListener("triggerdown", this.rightUseDown)
-      this._rightHand.removeEventListener("triggerup", this.rightUseUp)
-      this._rightHand.removeEventListener("gripup", this.rightDrop)
+      this._leftHand.removeEventListener("gripdown", this._left.grab)
+      this._leftHand.removeEventListener("triggerdown", this._left.useDown)
+      this._leftHand.removeEventListener("triggerup", this._left.useUp)
+      this._leftHand.removeEventListener("gripup", this._left.drop)
+      this._rightHand.removeEventListener("gripdown", this._right.grab)
+      this._rightHand.removeEventListener("triggerdown", this._right.useDown)
+      this._rightHand.removeEventListener("triggerup", this._right.useUp)
+      this._rightHand.removeEventListener("gripup", this._right.drop)
       removeEventListener("keydown", this._keyDown)
-      document.querySelector("canvas").removeEventListener("mousedown", this.useDown)
-      document.querySelector("canvas").removeEventListener("mouseup", this.useUp)
-      document.querySelector("canvas").removeEventListener("hold", this.toggleGrab)
-      document.querySelector("canvas").removeEventListener("tap", this.use)
+      document.querySelector("canvas").removeEventListener("mousedown", this._head.useDown)
+      document.querySelector("canvas").removeEventListener("mouseup", this._head.useUp)
+      document.querySelector("canvas").removeEventListener("hold", this._head.toggleGrab)
+      document.querySelector("canvas").removeEventListener("tap", this._head.use)
       console.log("grabber removed!")
     },
 
@@ -126,48 +137,36 @@
       let pos1 = THREE.Vector3.new()
       let pos2 = THREE.Vector3.new()
       let delta = THREE.Vector3.new()
-      if (this.grabbed) {
-        this.grabbed.object3D.getWorldPosition(pos1)
-        this.grabbed.copyWorldPosRot(this._anchor)
-        this.grabbed.object3D.getWorldPosition(pos2)
-        delta.copy(pos2).sub(pos1).multiplyScalar(512 / timeDelta)
+      for (let hand of this._hands) {
+        hand = "_" + hand
+        if (this[hand].grabbed) {
+          this[hand].grabbed.object3D.getWorldPosition(pos1)
+          this[hand].grabbed.copyWorldPosRot(this[hand].anchor)
+          this[hand].grabbed.object3D.getWorldPosition(pos2)
+          delta
+            .copy(pos2)
+            .sub(pos1)
+            .multiplyScalar(512 / timeDelta)
 
-        if (this.grabbed.body) {
-          this.grabbed.body.sleep()
-          this.grabbed.body.velocity.set(delta.x, delta.y, delta.z)
-          // this.grabbed.body.angularVelocity.set(0, 0, 0)
+          if (this[hand].grabbed.body) {
+            this[hand].grabbed.body.sleep()
+            this[hand].grabbed.body.velocity.set(delta.x, delta.y, delta.z)
+            // this[hand].grabbed.body.angularVelocity.set(0, 0, 0)
+          }
+          delta.copy(pos2).sub(pos1)
+          if (delta.length() > 1) {
+            this._wildItem++
+            if (this._wildItem > 3) this[hand].drop()
+          }
         }
       }
-      if (this.leftGrabbed) {
-        this.leftGrabbed.object3D.getWorldPosition(pos1)
-        this.leftGrabbed.copyWorldPosRot(this._leftAnchor)
-        this.leftGrabbed.object3D.getWorldPosition(pos2)
-        delta.copy(pos2).sub(pos1).multiplyScalar(512 / timeDelta)
-
-        if (this.leftGrabbed.body) {
-          this.leftGrabbed.body.sleep()
-          this.leftGrabbed.body.velocity.set(delta.x, delta.y, delta.z)
-          // this.leftGrabbed.body.angularVelocity.set(0, 0, 0)
-        }
-      }
-      if (this.rightGrabbed) {
-        this.rightGrabbed.object3D.getWorldPosition(pos1)
-        this.rightGrabbed.copyWorldPosRot(this._rightAnchor)
-        this.rightGrabbed.object3D.getWorldPosition(pos2)
-        delta.copy(pos2).sub(pos1).multiplyScalar(512 / timeDelta)
-
-        if (this.rightGrabbed.body) {
-          this.rightGrabbed.body.sleep()
-          this.rightGrabbed.body.velocity.set(delta.x, delta.y, delta.z)
-          // this.rightGrabbed.body.angularVelocity.set(0, 0, 0)
-        }
-      }
+      if (this._wildItem > 0) this._wildItem -= 0.5
     },
 
     enableHands: function () {
-      if (this._ray) {
-        this._camera.removeChild(this._ray)
-        this._ray = null
+      if (this._head.ray) {
+        this._head.hand.removeChild(this._head.ray)
+        this._head.ray = null
         this._leftHand.removeEventListener("buttonchanged", this.enableHands)
         this._rightHand.removeEventListener("buttonchanged", this.enableHands)
         this.hasHands = true
@@ -180,135 +179,71 @@
       if (grabbed) grabbed.emit(eventtype)
     },
 
-    toggleGrab: function () {
-      if (this.grabbed) this.drop()
-      else this.grab()
+    toggleGrab: function (hand = "head") {
+      hand = "_" + hand
+      if (this[hand].grabbed) this[hand].drop()
+      else this[hand].grab()
     },
 
-    grab: function () {
-      let ray = this._ray.components.raycaster
-      this._ray.components.raycaster.refreshObjects()
+    grab: function (hand = "head") {
+      hand = "_" + hand
+      let ray = this[hand].ray.components.raycaster
+      ray.refreshObjects()
       let int = ray.intersections[0]
       if (int) {
-        if (this.leftGrabbed == int.object.el) this.leftDrop()
-        if (this.rightGrabbed == int.object.el) this.rightDrop()
-        this.grabbed = int.object.el
-        if (this.grabbed.components.grabbable.data.freeOrientation) {
-          this._anchor.copyWorldPosRot(this.grabbed)
-          this._anchor.object3D.position.z -= 0.5 - int.distance
-          this._anchor.object3D.position.y -= 0.25
-        } else {
-          this._anchor.object3D.position.set(0, -0.25, -0.5)
-          this._anchor.object3D.quaternion.set(0, 0, 0, 1)
+        for (let h of this._hands) {
+          if (this["_" + h].grabbed == int.object.el) this.drop(h)
         }
-        console.log("I got something!", this.grabbed)
+        this[hand].grabbed = int.object.el
+        if (this[hand].grabbed.components.grabbable.data.freeOrientation) {
+          this[hand].anchor.copyWorldPosRot(this[hand].grabbed)
+          if (hand == "_head") {
+            this[hand].anchor.object3D.position.z -= 0.5 - int.distance
+            this[hand].anchor.object3D.position.y -= 0.25
+          }
+        } else {
+          if (hand == "_head") this[hand].anchor.object3D.position.set(0, -0.25, -0.5)
+          else this[hand].anchor.object3D.position.set(0, 0, 0)
+          this[hand].anchor.object3D.quaternion.set(0, 0, 0, 1)
+        }
+        if (hand != "_head") this[hand].hand.object3D.visible = false
+        console.log("I got something!", this[hand].grabbed)
       }
-      this.emit("grab", this._camera, this.grabbed)
+      this.emit("grab", this[hand].hand, this[hand].grabbed)
       console.log("Grabbing!")
     },
-    use: function () {
-      if (this._useed) {
-        clearTimeout(this._useed)
-        this.emit("useup", this._camera, this.grabbed)
-        this._useed = null
+    use: function (hand = "head") {
+      hand = "_" + hand
+      if (this._used) {
+        clearTimeout(this._used)
+        this[hand].useUp()
+        this._used = null
       }
-      this.emit("usedown", this._camera, this.grabbed)
-      this._useed = setTimeout(() => {
-        this.emit("useup", this._camera, this.grabbed)
-        this._useed = null
+      this[hand].useDown()
+      this._used = setTimeout(() => {
+        this[hand].useUp()
+        this._used = null
       }, 256)
     },
-    useDown: function () {
-      this.emit("usedown", this._camera, this.grabbed)
+    useDown: function (hand = "head") {
+      hand = "_" + hand
+      if (!this[hand].grabbed) this[hand].grab()
+      this.emit("usedown", this[hand].hand, this[hand].grabbed)
     },
-    useUp: function () {
-      this.emit("useup", this._camera, this.grabbed)
+    useUp: function (hand = "head") {
+      hand = "_" + hand
+      this.emit("useup", this[hand].hand, this[hand].grabbed)
     },
-    drop: function () {
-      if (this.grabbed) {
-        if (this.grabbed.body) {
-          this.grabbed.body.wakeUp()
+    drop: function (hand = "head") {
+      hand = "_" + hand
+      if (this[hand].grabbed) {
+        if (this[hand].grabbed.body) {
+          this[hand].grabbed.body.wakeUp()
         }
       }
-      this.emit("drop", this._camera, this.grabbed)
-      this.grabbed = null
-      // this._Hand.object3D.visible = true
-      console.log("Dropping!")
-    },
-
-    leftGrab: function () {
-      let ray = this._leftRay.components.raycaster
-      this._leftRay.components.raycaster.refreshObjects()
-      let int = ray.intersections[0]
-      if (int) {
-        if (this.grabbed == int.object.el) this.drop()
-        if (this.rightGrabbed == int.object.el) this.rightDrop()
-        this.leftGrabbed = int.object.el
-        if (this.leftGrabbed.components.grabbable.data.freeOrientation) {
-          this._leftAnchor.copyWorldPosRot(this.leftGrabbed)
-        } else {
-          this._leftAnchor.object3D.position.set(0, 0, 0)
-          this._leftAnchor.object3D.quaternion.set(0, 0, 0, 1)
-        }
-        this._leftHand.object3D.visible = false
-        console.log("I got something!", this.leftGrabbed)
-      }
-      this.emit("grab", this._leftHand, this.leftGrabbed)
-      console.log("Grabbing!")
-    },
-    leftUseDown: function () {
-      this.emit("usedown", this._leftHand, this.leftGrabbed)
-    },
-    leftUseUp: function () {
-      this.emit("useup", this._leftHand, this.leftGrabbed)
-    },
-    leftDrop: function () {
-      if (this.leftGrabbed) {
-        if (this.leftGrabbed.body) {
-          this.leftGrabbed.body.wakeUp()
-        }
-      }
-      this.emit("drop", this._leftHand, this.leftGrabbed)
-      this.leftGrabbed = null
-      this._leftHand.object3D.visible = true
-      console.log("Dropping!")
-    },
-
-    rightGrab: function () {
-      let ray = this._rightRay.components.raycaster
-      this._rightRay.components.raycaster.refreshObjects()
-      let int = ray.intersections[0]
-      if (int) {
-        if (this.grabbed == int.object.el) this.drop()
-        if (this.leftGrabbed == int.object.el) this.leftDrop()
-        this.rightGrabbed = int.object.el
-        if (this.rightGrabbed.components.grabbable.data.freeOrientation) {
-          this._rightAnchor.copyWorldPosRot(this.rightGrabbed)
-        } else {
-          this._rightAnchor.object3D.position.set(0, 0, 0)
-          this._rightAnchor.object3D.quaternion.set(0, 0, 0, 1)
-        }
-        this._rightHand.object3D.visible = false
-        console.log("I got something!", this.rightGrabbed)
-      }
-      this.emit("grab", this._rightHand, this.rightGrabbed)
-      console.log("Grabbing!")
-    },
-    rightUseDown: function () {
-      this.emit("usedown", this._rightHand, this.rightGrabbed)
-    },
-    rightUseUp: function () {
-      this.emit("useup", this._rightHand, this.rightGrabbed)
-    },
-    rightDrop: function () {
-      if (this.rightGrabbed) {
-        if (this.rightGrabbed.body) {
-          this.rightGrabbed.body.wakeUp()
-        }
-      }
-      this.emit("drop", this._rightHand, this.rightGrabbed)
-      this.rightGrabbed = null
-      this._rightHand.object3D.visible = true
+      this.emit("drop", this[hand].hand, this[hand].grabbed)
+      this[hand].grabbed = null
+      if (hand != "_head") this[hand].hand.object3D.visible = true
       console.log("Dropping!")
     },
 
@@ -324,8 +259,7 @@
 
     update: function () {
       // Do something when component's data is updated.
-      if (this.data.dynamicBody && !this.el.getAttribute("dynamic-body"))
-        this.el.setAttribute("dynamic-body", "")
+      if (this.data.dynamicBody && !this.el.getAttribute("dynamic-body")) this.el.setAttribute("dynamic-body", "")
 
       console.log("grabbable updated!", this.data)
     }

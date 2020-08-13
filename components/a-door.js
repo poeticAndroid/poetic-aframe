@@ -15,6 +15,14 @@
       this._closedAng = this.el.components.rotation.data.y
       this._knob = this.el.ensure(".door-knob", "a-box", { class: "door-knob", depth: 0.25, grabbable: { dynamicBody: false }, visible: false })
       this._knobRad = parseFloat(this._knob.getAttribute("radius"))
+      this._grabber = document.querySelector("[grabber]")
+
+      this.open = this.open.bind(this)
+      this._knob.addEventListener("usedown", this.open)
+    },
+
+    remove: function () {
+      this._knob.removeEventListener("usedown", this.open)
     },
 
     update: function () {
@@ -30,25 +38,29 @@
       let ang = this.el.components.rotation.data.y
       let knobz = this._knob.object3D.position.z
       ang -= knobz * 8
-      if (ang > this._closedAng) this._pulled = false
-      if (ang < this._closedAng) this._pushed = false
+      if (ang > this._closedAng + 1) this._pulled = false
+      if (ang < this._closedAng - 1) this._pushed = false
       ang = Math.min(Math.max(this._pulled ? this._minAng : this._closedAng, ang), this._pushed ? this._maxAng : this._closedAng)
       this.el.setAttribute("rotation", { x: 0, y: ang, z: 0 })
-      if (Math.abs(knobz) > 0.005) {
-        this._knob.object3D.position.set(this._width / 2, 0, knobz - (knobz / Math.abs(knobz)) * 0.005)
-        if (this._lockTO) {
-          clearTimeout(this._lockTO)
+      if (Math.abs(knobz) < 0.005 || Math.abs(knobz) > 1) knobz = 0
+      this._knob.object3D.position.set(this._width / 2, 0, knobz ? (knobz - (knobz / Math.abs(knobz)) * 0.005) : 0)
+      this._knob.object3D.quaternion.set(0, 0, 0, 1)
+      if (!this._pushed && !this._pulled && !this._lockTO)
+        this._lockTO = setTimeout(() => {
+          this._pushed = !this.data.locked
+          this._pulled = !this.data.locked
+          this._knob.object3D.position.set(0, 0, 0)
           this._lockTO = false
-        }
+        }, 512)
+    },
+
+    open: function () {
+      if (this._grabber) this._grabber.components.grabber.drop()
+      let ang = this.el.components.rotation.data.y
+      if (Math.abs(ang - this._maxAng) < Math.abs(ang - this._minAng)) {
+        this._knob.object3D.position.set(0, 0, .5)
       } else {
-        if (!this._lockTO)
-          this._lockTO = setTimeout(() => {
-            this._pushed = !this.data.locked
-            this._pulled = !this.data.locked
-            this._knob.object3D.position.set(this._width / 2, 0, 0)
-            this._knob.object3D.quaternion.set(0, 0, 0, 1)
-            // this._lockTO = false
-          }, 512)
+        this._knob.object3D.position.set(0, 0, -.5)
       }
     }
   })
