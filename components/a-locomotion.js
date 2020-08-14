@@ -100,11 +100,11 @@
     },
 
     tick: function (time, timeDelta) {
-      let dir = THREE.Vector2.new()
-      let camdir = THREE.Vector2.new()
-      let pivot = THREE.Vector2.new()
-      let delta = THREE.Vector3.new()
-      let matrix = THREE.Matrix3.new()
+      let dir = THREE.Vector2.temp()
+      let camdir = THREE.Vector2.temp()
+      let pivot = THREE.Vector2.temp()
+      let delta = THREE.Vector3.temp()
+      let matrix = THREE.Matrix3.temp()
       let gamepad, i, l, len, mk, ref, rk
       this._cameraObj.object3D.updateMatrix()
       // Do something on every scene tick or frame.
@@ -247,7 +247,7 @@
     },
 
     moveBy: function (x, z) {
-      let delta = THREE.Vector3.new()
+      let delta = THREE.Vector3.temp()
       delta.set(x, 0, z)
 
       this.playCenter.add(delta)
@@ -256,7 +256,7 @@
       this.el.object3D.position.add(delta)
     },
     moveTo: function (x, y, z, safe) {
-      let delta = THREE.Vector3.new()
+      let delta = THREE.Vector3.temp()
       if (safe) this.safePos.set(x, y, z)
       delta.set(x - this.playerPos.x, y - this.playerPos.y, z - this.playerPos.z)
 
@@ -267,9 +267,9 @@
     },
 
     rotateBy: function (angle) {
-      let pos = THREE.Vector2.new()
-      let pivot = THREE.Vector2.new()
-      let delta = THREE.Vector3.new()
+      let pos = THREE.Vector2.temp()
+      let pivot = THREE.Vector2.temp()
+      let delta = THREE.Vector3.temp()
       pos.set(this.playerPos.x, this.playerPos.z)
       pivot.set(this.playCenter.x, this.playCenter.z)
       pos.rotateAround(pivot, -angle)

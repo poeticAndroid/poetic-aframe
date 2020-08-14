@@ -134,9 +134,9 @@
           this._gamepadDelta[7] = gamepad.buttons[7].value > 0.75
         }
       }
-      let pos1 = THREE.Vector3.new()
-      let pos2 = THREE.Vector3.new()
-      let delta = THREE.Vector3.new()
+      let pos1 = THREE.Vector3.temp()
+      let pos2 = THREE.Vector3.temp()
+      let delta = THREE.Vector3.temp()
       for (let hand of this._hands) {
         hand = "_" + hand
         if (this[hand].grabbed) {
@@ -245,6 +245,12 @@
       this[hand].grabbed = null
       if (hand != "_head") this[hand].hand.object3D.visible = true
       console.log("Dropping!")
+    },
+    dropObject: function (el) {
+      for (let hand of this._hands) {
+        hand = "_" + hand
+        if (this[hand].grabbed == el) this[hand].drop()
+      }
     },
 
     _keyDown: function (e) {

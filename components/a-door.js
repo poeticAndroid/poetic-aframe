@@ -17,12 +17,12 @@
       this._knobRad = parseFloat(this._knob.getAttribute("radius"))
       this._grabber = document.querySelector("[grabber]")
 
-      this.open = this.open.bind(this)
-      this._knob.addEventListener("usedown", this.open)
+      this.toggleOpen = this.toggleOpen.bind(this)
+      this._knob.addEventListener("usedown", this.toggleOpen)
     },
 
     remove: function () {
-      this._knob.removeEventListener("usedown", this.open)
+      this._knob.removeEventListener("usedown", this.toggleOpen)
     },
 
     update: function () {
@@ -54,8 +54,8 @@
         }, 512)
     },
 
-    open: function () {
-      if (this._grabber) this._grabber.components.grabber.drop()
+    toggleOpen: function () {
+      if (this._grabber) this._grabber.components.grabber.dropObject(this._knob)
       let ang = this.el.components.rotation.data.y
       if (Math.abs(ang - this._maxAng) < Math.abs(ang - this._minAng)) {
         this._knob.object3D.position.set(0, 0, .5)
