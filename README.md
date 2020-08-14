@@ -1,13 +1,13 @@
-# A-Frame components and stuff made by poeticAndroid!
+# A-Frame components made by poeticAndroid!
 
 ```html
 <script type="text/javascript" src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.6/components/utils.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.6/components/a-tiledwalls.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.6/components/a-locomotion.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.6/components/a-items.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.6/components/a-door.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.7/components/utils.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.7/components/a-tiledwalls.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.7/components/a-locomotion.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.7/components/a-items.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.7/components/a-door.js"></script>
 ```
 
 [Click for demo!](https://poetic-aframe.glitch.me/)

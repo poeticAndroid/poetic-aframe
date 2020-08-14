@@ -1,6 +1,6 @@
 # a-door.js
 
-component for making doors.
+Component for making doors.
 
 ## door
 
@@ -15,9 +15,15 @@ Add the `door` component to an entity where the middle of the hinge should be.
 ### Properties
 
 | Property | Description                                | Default |
-|----------|--------------------------------------------|---------|
+| -------- | ------------------------------------------ | ------- |
 | width    | The width of the door.                     | 1       |
 | push     | How far the door can be pushed in degrees. | 120     |
 | pull     | How far the door can be pulled in degrees. | 120     |
 | open     | Initial opening of the door in degrees.    | 0       |
 | locked   | Whether or not the door is locked.         | false   |
+
+### Methods
+
+| Method       | Description                      |
+| ------------ | -------------------------------- |
+| toggleOpen() | Toggle the door open and closed. |

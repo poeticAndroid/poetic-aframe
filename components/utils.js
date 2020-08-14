@@ -1,7 +1,7 @@
 /* global AFRAME, THREE */
 
 THREE.Vector2._pool = []
-THREE.Vector2.new = function () {
+THREE.Vector2.temp = function () {
   let vec = THREE.Vector2._pool.pop() || new THREE.Vector2()
   setTimeout(() => {
     THREE.Vector2._pool.push(vec)
@@ -9,7 +9,7 @@ THREE.Vector2.new = function () {
   return vec
 }
 THREE.Vector3._pool = []
-THREE.Vector3.new = function () {
+THREE.Vector3.temp = function () {
   let vec = THREE.Vector3._pool.pop() || new THREE.Vector3()
   setTimeout(() => {
     THREE.Vector3._pool.push(vec)
@@ -17,7 +17,7 @@ THREE.Vector3.new = function () {
   return vec
 }
 THREE.Quaternion._pool = []
-THREE.Quaternion.new = function () {
+THREE.Quaternion.temp = function () {
   let quat = THREE.Quaternion._pool.pop() || new THREE.Quaternion()
   setTimeout(() => {
     THREE.Quaternion._pool.push(quat)
@@ -25,7 +25,7 @@ THREE.Quaternion.new = function () {
   return quat
 }
 THREE.Matrix3._pool = []
-THREE.Matrix3.new = function () {
+THREE.Matrix3.temp = function () {
   let mat = THREE.Matrix3._pool.pop() || new THREE.Matrix3()
   setTimeout(() => {
     THREE.Matrix3._pool.push(mat)
@@ -33,7 +33,7 @@ THREE.Matrix3.new = function () {
   return mat
 }
 THREE.Matrix4._pool = []
-THREE.Matrix4.new = function () {
+THREE.Matrix4.temp = function () {
   let mat = THREE.Matrix4._pool.pop() || new THREE.Matrix4()
   setTimeout(() => {
     THREE.Matrix4._pool.push(mat)
@@ -42,7 +42,7 @@ THREE.Matrix4.new = function () {
 }
 
 AFRAME.AEntity.prototype.copyWorldPosRot = function (srcEl) {
-  let quat = THREE.Quaternion.new()
+  let quat = THREE.Quaternion.temp()
   let src = srcEl.object3D
   let dest = this.object3D
   let body = this.body
