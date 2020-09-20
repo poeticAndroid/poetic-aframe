@@ -66,14 +66,12 @@
       this._nextMove = 0
       this._targetDir = 0
       this._alt = 0
-      console.log("Player initialized!")
     },
 
     update: function () {
       // Do something when component's data is updated.
       this._camera.setAttribute("wasd-controls", "acceleration", this.data.acceleration)
       let pos = JSON.parse(JSON.stringify(this.el.getAttribute("position")))
-      console.log("i got pos", pos)
       let to = setInterval(() => {
         this.moveTo(pos.x, pos.y, pos.z, true)
       }, 1024)
@@ -81,7 +79,6 @@
         clearInterval(to)
         if (this.floorOffset) this.toggleCrouch()
       }, 3000)
-      console.log("Player updated!", this.data)
     },
 
     remove: function () {
@@ -96,7 +93,6 @@
       removeEventListener("keyup", this._keyUp)
       document.querySelector("canvas").removeEventListener("swipeup", this._fireDown)
       document.querySelector("canvas").removeEventListener("touchend", this._fireUp)
-      console.log("Player removed!")
     },
 
     tick: function (time, timeDelta) {
@@ -296,7 +292,6 @@
 
         this._rightHand.removeEventListener("buttonchanged", this.enableHands)
         this.hasHands = true
-        console.log("Hands are enabled!")
       }
     },
 
@@ -323,7 +318,6 @@
     },
 
     _buttonChanged: function (e) {
-      // console.log(e.detail.id, e.detail.state.pressed)
       if (e.srcElement.getAttribute("hand-controls").hand === "left") {
         if (e.detail.id == 3 && e.detail.state.pressed) this.data.quantizeMovement = !this.data.quantizeMovement
       } else {
@@ -370,8 +364,6 @@
       // Do something when component's data is updated.
       if (this.data.staticBody && !this.el.getAttribute("static-body"))
         this.el.setAttribute("static-body", "")
-
-      console.log("floor updated!", this.data)
     }
   })
   AFRAME.registerComponent("wall", {
@@ -383,8 +375,6 @@
       // Do something when component's data is updated.
       if (this.data.staticBody && !this.el.getAttribute("static-body"))
         this.el.setAttribute("static-body", "")
-
-      console.log("wall updated!", this.data)
     }
   })
 }.call(this))

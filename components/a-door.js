@@ -54,7 +54,8 @@
         }, 512)
     },
 
-    toggleOpen: function () {
+    toggleOpen: function (e) {
+      this._grabber = e.detail.grabber || this._grabber
       if (this._grabber) this._grabber.components.grabber.dropObject(this._knob)
       let ang = this.el.components.rotation.data.y
       if (Math.abs(ang - this._maxAng) < Math.abs(ang - this._minAng)) {

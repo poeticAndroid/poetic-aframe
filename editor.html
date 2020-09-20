@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#world</title>
+  <style>
+    html {
+      background-color: black;
+      color: yellow;
+    }
+
+    body {
+      text-align: center;
+    }
+
+    textarea {
+      background-color: transparent;
+      color: inherit;
+      width: 90vw;
+      height: 90vh;
+    }
+  </style>
+</head>
+
+<body>
+  <textarea autofocus></textarea>
+  <br />
+  <button id="clearBtn">Clear</button>
+  <button id="loadBtn">Load</button>
+  <script>
+    let txt = document.querySelector("textarea")
+    txt.addEventListener("focus", () => {
+      txt.value = localStorage.getItem("#world").replace(/><a-/gi, ">\n<a-").trim()
+    })
+    txt.addEventListener("change", () => {
+      localStorage.setItem("#world", txt.value.trim())
+      document.title = Date.now()
+    })
+    txt.addEventListener("keyup", () => {
+      localStorage.setItem("#world", txt.value.trim())
+      document.title = Date.now()
+    })
+
+
+    let clearBtn = document.querySelector("#clearBtn")
+    clearBtn.addEventListener("click", () => {
+      if (confirm("Are you sure you wish to clear?")) {
+        load("scenes/new.html")
+      }
+    })
+
+    let loadBtn = document.querySelector("#loadBtn")
+    loadBtn.addEventListener("click", () => {
+      let url = prompt("Enter url to load", "scenes/")
+      if (url) {
+        load(url)
+      }
+    })
+
+    async function load(url) {
+      txt.blur()
+      let html = await (await fetch(url)).text()
+      localStorage.setItem("#world", html.trim())
+      txt.focus()
+    }
+
+  </script>
+</body>
+
+</html>

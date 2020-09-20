@@ -51,6 +51,10 @@
 
       this.enableHands = this.enableHands.bind(this)
       this._keyDown = this._keyDown.bind(this)
+      this._mouseDown = this._mouseDown.bind(this)
+      this._mouseUp = this._mouseUp.bind(this)
+      this._buttonDown = this._buttonDown.bind(this)
+      this._buttonUp = this._buttonUp.bind(this)
       this._head.toggleGrab = () => { this.toggleGrab("head") }
       this._head.grab = () => { this.grab("head") }
       this._head.use = () => { this.use("head") }
@@ -75,24 +79,26 @@
       this._leftHand.addEventListener("gripdown", this._left.grab)
       this._leftHand.addEventListener("triggerdown", this._left.useDown)
       this._leftHand.addEventListener("triggerup", this._left.useUp)
+      this._leftHand.addEventListener("buttondown", this._buttonDown)
+      this._leftHand.addEventListener("buttonup", this._buttonUp)
       this._leftHand.addEventListener("gripup", this._left.drop)
       this._rightHand.addEventListener("gripdown", this._right.grab)
       this._rightHand.addEventListener("triggerdown", this._right.useDown)
       this._rightHand.addEventListener("triggerup", this._right.useUp)
+      this._rightHand.addEventListener("buttondown", this._buttonDown)
+      this._rightHand.addEventListener("buttonup", this._buttonUp)
       this._rightHand.addEventListener("gripup", this._right.drop)
       addEventListener("keydown", this._keyDown)
-      document.querySelector("canvas").addEventListener("mousedown", this._head.useDown)
-      document.querySelector("canvas").addEventListener("mouseup", this._head.useUp)
+      document.querySelector("canvas").addEventListener("mousedown", this._mouseDown)
+      document.querySelector("canvas").addEventListener("mouseup", this._mouseUp)
       document.querySelector("canvas").addEventListener("hold", this._head.toggleGrab)
       document.querySelector("canvas").addEventListener("tap", this._head.use)
 
       this._wildItem = 0
-      console.log("grabber initialized!")
     },
 
     update: function () {
       // Do something when component's data is updated.
-      console.log("grabber updated!", this.data)
     },
 
     remove: function () {
@@ -102,17 +108,20 @@
       this._leftHand.removeEventListener("gripdown", this._left.grab)
       this._leftHand.removeEventListener("triggerdown", this._left.useDown)
       this._leftHand.removeEventListener("triggerup", this._left.useUp)
+      this._leftHand.removeEventListener("buttondown", this._buttonDown)
+      this._leftHand.removeEventListener("buttonup", this._buttonUp)
       this._leftHand.removeEventListener("gripup", this._left.drop)
       this._rightHand.removeEventListener("gripdown", this._right.grab)
       this._rightHand.removeEventListener("triggerdown", this._right.useDown)
       this._rightHand.removeEventListener("triggerup", this._right.useUp)
+      this._rightHand.removeEventListener("buttondown", this._buttonDown)
+      this._rightHand.removeEventListener("buttonup", this._buttonUp)
       this._rightHand.removeEventListener("gripup", this._right.drop)
       removeEventListener("keydown", this._keyDown)
-      document.querySelector("canvas").removeEventListener("mousedown", this._head.useDown)
-      document.querySelector("canvas").removeEventListener("mouseup", this._head.useUp)
+      document.querySelector("canvas").removeEventListener("mousedown", this._mouseDown)
+      document.querySelector("canvas").removeEventListener("mouseup", this._mouseUp)
       document.querySelector("canvas").removeEventListener("hold", this._head.toggleGrab)
       document.querySelector("canvas").removeEventListener("tap", this._head.use)
-      console.log("grabber removed!")
     },
 
     tick: function (time, timeDelta) {
@@ -170,13 +179,16 @@
         this._leftHand.removeEventListener("buttonchanged", this.enableHands)
         this._rightHand.removeEventListener("buttonchanged", this.enableHands)
         this.hasHands = true
-        console.log("Hands are enabled!")
       }
     },
-    emit: function (eventtype, hand, grabbed) {
-      console.log("emitting", eventtype)
-      hand.emit(eventtype)
-      if (grabbed) grabbed.emit(eventtype)
+    emit: function (eventtype, hand, grabbed, e = {}) {
+      e.grabber = this.el
+      e.handElement = hand
+      for (let _hand of this._hands) {
+        if (this["_" + _hand].hand === hand) e.hand = _hand
+      }
+      hand.emit(eventtype, e)
+      if (grabbed) grabbed.emit(eventtype, e)
     },
 
     toggleGrab: function (hand = "head") {
@@ -207,32 +219,30 @@
           this[hand].anchor.object3D.quaternion.set(0, 0, 0, 1)
         }
         if (hand != "_head") this[hand].hand.object3D.visible = false
-        console.log("I got something!", this[hand].grabbed)
       }
       this.emit("grab", this[hand].hand, this[hand].grabbed)
-      console.log("Grabbing!")
     },
-    use: function (hand = "head") {
+    use: function (hand = "head", button = 0) {
       hand = "_" + hand
       if (this._used) {
         clearTimeout(this._used)
-        this[hand].useUp()
+        this[hand].useUp(button)
         this._used = null
       }
-      this[hand].useDown()
+      this[hand].useDown(button)
       this._used = setTimeout(() => {
-        this[hand].useUp()
+        this[hand].useUp(button)
         this._used = null
       }, 256)
     },
-    useDown: function (hand = "head") {
+    useDown: function (hand = "head", button = 0) {
       hand = "_" + hand
       if (!this[hand].grabbed) this[hand].grab()
-      this.emit("usedown", this[hand].hand, this[hand].grabbed)
+      this.emit("usedown", this[hand].hand, this[hand].grabbed, { button: button })
     },
-    useUp: function (hand = "head") {
+    useUp: function (hand = "head", button = 0) {
       hand = "_" + hand
-      this.emit("useup", this[hand].hand, this[hand].grabbed)
+      this.emit("useup", this[hand].hand, this[hand].grabbed, { button: button })
     },
     drop: function (hand = "head") {
       hand = "_" + hand
@@ -244,7 +254,6 @@
       this.emit("drop", this[hand].hand, this[hand].grabbed)
       this[hand].grabbed = null
       if (hand != "_head") this[hand].hand.object3D.visible = true
-      console.log("Dropping!")
     },
     dropObject: function (el) {
       for (let hand of this._hands) {
@@ -255,6 +264,30 @@
 
     _keyDown: function (e) {
       if (e.code == "KeyE") this.toggleGrab()
+    },
+
+    _mouseDown: function (e) {
+      let btn = e.button
+      this.useDown("head", btn ? ((btn % 2) ? btn + 1 : btn - 1) : btn)
+    },
+    _mouseUp: function (e) {
+      let btn = e.button
+      this.useUp("head", btn ? ((btn % 2) ? btn + 1 : btn - 1) : btn)
+    },
+
+    _buttonDown: function (e) {
+      let btn = e.detail.id - 3
+      if (btn < 1) return
+      let hand = "right"
+      if (e.target == this._leftHand) hand = "left"
+      this.useDown(hand, btn)
+    },
+    _buttonUp: function (e) {
+      let btn = e.detail.id - 3
+      if (btn < 1) return
+      let hand = "right"
+      if (e.target == this._leftHand) hand = "left"
+      this.useUp(hand, btn)
     }
   })
   AFRAME.registerComponent("grabbable", {
@@ -266,8 +299,6 @@
     update: function () {
       // Do something when component's data is updated.
       if (this.data.dynamicBody && !this.el.getAttribute("dynamic-body")) this.el.setAttribute("dynamic-body", "")
-
-      console.log("grabbable updated!", this.data)
     }
   })
 }.call(this))
