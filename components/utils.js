@@ -46,6 +46,9 @@ AFRAME.AEntity.prototype.copyWorldPosRot = function (srcEl) {
   let src = srcEl.object3D
   let dest = this.object3D
   let body = this.body
+  if (!src) return
+  if (!dest) return
+  if (!dest.parent) return
   src.getWorldPosition(dest.position)
   if (body) {
     body.position.copy(dest.position)
