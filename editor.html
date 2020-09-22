@@ -22,6 +22,16 @@
       height: 90vh;
     }
   </style>
+  <script type="text/javascript" src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
+  <script type="text/javascript" src="components/utils.js"></script>
+  <script type="text/javascript" src="components/a-locomotion.js"></script>
+  <script type="text/javascript" src="components/a-items.js"></script>
+  <script type="text/javascript" src="components/a-include.js"></script>
+  <script type="text/javascript" src="components/a-editor.js"></script>
+  <script type="text/javascript" src="components/a-tiledwalls.js"></script>
+  <script type="text/javascript" src="components/a-door.js"></script>
 </head>
 
 <body>
@@ -29,18 +39,17 @@
   <br />
   <button id="clearBtn">Clear</button>
   <button id="loadBtn">Load</button>
+  <button id="runBtn">Run</button>
   <script>
     let txt = document.querySelector("textarea")
     txt.addEventListener("focus", () => {
-      txt.value = localStorage.getItem("#world").replace(/><a-/gi, ">\n<a-").trim()
+      txt.value = localStorage.getItem("#world").replace(/><a-/gi, ">\n  <a-").trim()
     })
     txt.addEventListener("change", () => {
       localStorage.setItem("#world", txt.value.trim())
-      document.title = Date.now()
     })
     txt.addEventListener("keyup", () => {
       localStorage.setItem("#world", txt.value.trim())
-      document.title = Date.now()
     })
 
 
@@ -53,10 +62,17 @@
 
     let loadBtn = document.querySelector("#loadBtn")
     loadBtn.addEventListener("click", () => {
-      let url = prompt("Enter url to load", "scenes/")
+      let url = prompt("Enter scene to load")
+      if (!url.includes("/")) url = "scenes/" + url
+      if (!url.includes(".")) url = url + ".html"
       if (url) {
         load(url)
       }
+    })
+
+    let runBtn = document.querySelector("#runBtn")
+    runBtn.addEventListener("click", () => {
+      document.body.innerHTML = '<a-scene loading-screen><a-entity include="scenes/_assets.html"></a-entity><a-entity locomotion grabber><a-torus-knot editor scale=".0625 .0625 .03125" position="0 1 -.25"></a-torus-knot></a-entity>'
     })
 
     async function load(url) {

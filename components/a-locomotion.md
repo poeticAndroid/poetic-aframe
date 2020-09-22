@@ -67,3 +67,12 @@ Add the `wall` component to any object you want the player not to be able to wal
 | Property   | Description                                                  | Default |
 | ---------- | ------------------------------------------------------------ | ------- |
 | staticBody | Whether or not to add `static-body` component automatically. | true    |
+
+## start
+
+Add the `start` component to any object you want the player to start at.
+
+```html
+<a-box start></a-box>
+```
+

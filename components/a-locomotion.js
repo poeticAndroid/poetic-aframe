@@ -71,14 +71,6 @@
     update: function () {
       // Do something when component's data is updated.
       this._camera.setAttribute("wasd-controls", "acceleration", this.data.acceleration)
-      let pos = JSON.parse(JSON.stringify(this.el.getAttribute("position")))
-      let to = setInterval(() => {
-        this.moveTo(pos.x, pos.y, pos.z, true)
-      }, 1024)
-      setTimeout(() => {
-        clearInterval(to)
-        if (this.floorOffset) this.toggleCrouch()
-      }, 3000)
     },
 
     remove: function () {
@@ -375,6 +367,27 @@
       // Do something when component's data is updated.
       if (this.data.staticBody && !this.el.getAttribute("static-body"))
         this.el.setAttribute("static-body", "")
+    }
+  })
+  AFRAME.registerComponent("start", {
+    dependencies: ["floor"],
+
+    update: function () {
+      // Do something when component's data is updated.
+      let loco = document.querySelector("[locomotion]").components.locomotion
+      let pos = this.el.object3D.position
+      console.log("starting at", pos)
+      loco.moveTo(pos.x, pos.y, pos.z, true)
+      
+      requestAnimationFrame(() => {
+        loco.moveTo(pos.x, pos.y, pos.z, true)
+        setTimeout(() => {
+          loco.moveTo(pos.x, pos.y, pos.z, true)
+          setTimeout(() => {
+            if (loco.floorOffset) loco.toggleCrouch()
+          }, 1024)
+        }, 1024)
+      })
     }
   })
 }.call(this))

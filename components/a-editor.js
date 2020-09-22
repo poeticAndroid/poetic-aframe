@@ -15,16 +15,22 @@
       this._world = this.el.sceneEl.ensure("#world", "a-entity", { id: "world" })
       this._anchor = this.el.ensure(".editor-anchor", "a-entity", { class: "editor-anchor" })
       this._angularSize = new THREE.Vector3()
-      
+
       this.load = this.load.bind(this)
       this.save = this.save.bind(this)
       this._grab = this._grab.bind(this)
       this._useDown = this._useDown.bind(this)
       this._useUp = this._useUp.bind(this)
+      this._onAttach = this._onAttach.bind(this)
       this.el.addEventListener("grab", this._grab)
       this.el.addEventListener("usedown", this._useDown)
       this.el.addEventListener("useup", this._useUp)
-      setTimeout(this.load)
+      // this._world.addEventListener("child-attached", this._onAttach)
+      if (this.el.sceneEl.hasLoaded) {
+        this.load()
+      } else {
+        this.el.sceneEl.addEventListener("loaded", this.load)
+      }
     },
 
     remove: function () {
@@ -34,7 +40,7 @@
     },
 
     update: function () {
-      this._angularSize.set(Math.PI * 2, Math.PI * 2, Math.PI * 2).divide(this.data.rotationSteps)
+      this._angularSize.set(360, 360, 360).divide(this.data.rotationSteps)
       if (!this.el.getAttribute("grabbable")) this.el.setAttribute("grabbable", {
         dynamicBody: false,
         freeOrientation: false
@@ -70,6 +76,7 @@
         src: srcEl,
         world: worldEl
       })
+      worldEl.addEventListener("loaded", () => { worldEl.pause(); console.log("blam!") })
       this._src.appendChild(srcEl)
       this._world.appendChild(worldEl)
     },
@@ -100,6 +107,11 @@
     },
 
     load: function () {
+      if (!this.el.sceneEl.querySelector("a-assets")) {
+        let to = setTimeout(this.load, 1024)
+        return
+      }
+
       while (this._map.length) this.removeEntity(this._map.length - 1)
       let src = localStorage.getItem("#world")
       if (!src) return
@@ -112,16 +124,16 @@
       }
     },
     save: function () {
-      console.log("Saving, okay?")
       let rot = THREE.Vector3.temp()
       for (let i = 0; i < this._map.length; i++) {
         let m = this._map[i]
         // m.world.flushToDOM()
-        m.src.setAttribute("position", AFRAME.utils.coordinates.stringify(m.world.object3D.position))
-        console.log("saving pos", m.src.getAttribute("position"))
-        rot.copy(m.world.object3D.rotation).multiplyScalar(180 / Math.PI)
-        m.src.setAttribute("rotation", AFRAME.utils.coordinates.stringify(rot))
-        // m.src.setAttribute("scale", AFRAME.utils.coordinates.stringify(m.world.object3D.scale))
+        if (m.world.getAttribute("position"))
+          m.src.setAttribute("position", AFRAME.utils.coordinates.stringify(m.world.getAttribute("position")))
+        if (m.world.getAttribute("rotation"))
+          m.src.setAttribute("rotation", AFRAME.utils.coordinates.stringify(m.world.getAttribute("rotation")))
+        if (m.world.getAttribute("scale"))
+          m.src.setAttribute("scale", AFRAME.utils.coordinates.stringify(m.world.getAttribute("scale")))
       }
       // this._src.flushToDOM(true)
       localStorage.setItem("#world", this._src.outerHTML)
@@ -129,6 +141,9 @@
 
     _grab: function (e) {
       this._grabbed = true
+      setTimeout(() => {
+        this._grabbed = false
+      }, 256)
     },
 
     _useDown: function (e) {
@@ -149,7 +164,6 @@
     _useUp: function (e) {
       if (this._grabbed === true) this._grabbed = false
       if (this._grabbed) {
-        let rot = THREE.Vector3.temp()
         switch (e.detail.button) {
           case 1:
             let i = this.findEntity(this._grabbed)
@@ -162,10 +176,7 @@
             let e = this._map.length
             this.addEntity(html)
             let m = this._map[e]
-            this._grabbed.object3D.position.divide(this.data.gridSize).round().multiply(this.data.gridSize)
-            rot.copy(this._grabbed.object3D.rotation).divide(this._angularSize).round().multiply(this._angularSize)
-            this._grabbed.object3D.rotation.setFromVector3(rot)
-            this._grabbed.emit("place")
+            this._place()
             this._grabbed = m.world
             break
           case 2:
@@ -173,15 +184,32 @@
             this._grabbed = null
             break
           default:
-            this._grabbed.object3D.position.divide(this.data.gridSize).round().multiply(this.data.gridSize)
-            rot.copy(this._grabbed.object3D.rotation).divide(this._angularSize).round().multiply(this._angularSize)
-            this._grabbed.object3D.rotation.setFromVector3(rot)
-            this._grabbed.emit("place")
+            this._place()
             this._grabbed = null
         }
         clearTimeout(this._saveTO)
         this._saveTO = setTimeout(this.save, 1024)
       }
+      let ray = this.el.components.raycaster
+      ray.refreshObjects()
+    },
+
+    _onAttach: function (e) {
+      console.log(e.detail)
+      let child = e.detail.el
+      child.pause()
+      child.addEventListener("loaded", () => { child.pause(); console.log("boom!") })
+      // setTimeout(() => {
+      //   child.pause(); console.log("pew!")
+      // }, 1024);
+    },
+
+    _place: function () {
+      let rot = THREE.Vector3.temp()
+      this._grabbed.object3D.position.divide(this.data.gridSize).round().multiply(this.data.gridSize)
+      rot.copy(this._grabbed.getAttribute("rotation")).divide(this._angularSize).round().multiply(this._angularSize)
+      this._grabbed.setAttribute("rotation", AFRAME.utils.coordinates.stringify(rot))
+      this._grabbed.emit("place")
     },
 
     _parseHTML: function (html) {
