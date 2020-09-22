@@ -3,13 +3,13 @@
 ```html
 <script type="text/javascript" src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.8/components/utils.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.8/components/a-locomotion.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.8/components/a-items.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.8/components/a-include.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.8/components/a-editor.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.8/components/a-tiledwalls.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.8/components/a-door.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.10/components/utils.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.10/components/a-locomotion.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.10/components/a-items.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.10/components/a-include.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.10/components/a-editor.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.10/components/a-tiledwalls.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/poeticAndroid/poetic-aframe@v0.10/components/a-door.js"></script>
 ```
 
 [Click for demo!](https://poetic-aframe.glitch.me/)
