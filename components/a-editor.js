@@ -13,7 +13,7 @@
       this._div = document.body.ensure("template")
       this._src = this._parseHTML('<a-entity id="world">\n</a-entity>')
       this._world = this.el.sceneEl.ensure("#world", "a-entity", { id: "world" })
-      this._anchor = this.el.ensure(".editor-anchor", "a-entity", { class: "editor-anchor" })
+      this._anchor = this.el.ensure(".editor-anchor", "a-box", { class: "editor-anchor" })
       this._angularSize = new THREE.Vector3()
 
       this.load = this.load.bind(this)
@@ -21,11 +21,9 @@
       this._grab = this._grab.bind(this)
       this._useDown = this._useDown.bind(this)
       this._useUp = this._useUp.bind(this)
-      this._onAttach = this._onAttach.bind(this)
       this.el.addEventListener("grab", this._grab)
       this.el.addEventListener("usedown", this._useDown)
       this.el.addEventListener("useup", this._useUp)
-      // this._world.addEventListener("child-attached", this._onAttach)
       if (this.el.sceneEl.hasLoaded) {
         this.load()
       } else {
@@ -76,7 +74,7 @@
         src: srcEl,
         world: worldEl
       })
-      worldEl.addEventListener("loaded", () => { worldEl.pause(); console.log("blam!") })
+      worldEl.addEventListener("loaded", () => { worldEl.pause() })
       this._src.appendChild(srcEl)
       this._world.appendChild(worldEl)
     },
@@ -192,16 +190,6 @@
       }
       let ray = this.el.components.raycaster
       ray.refreshObjects()
-    },
-
-    _onAttach: function (e) {
-      console.log(e.detail)
-      let child = e.detail.el
-      child.pause()
-      child.addEventListener("loaded", () => { child.pause(); console.log("boom!") })
-      // setTimeout(() => {
-      //   child.pause(); console.log("pew!")
-      // }, 1024);
     },
 
     _place: function () {

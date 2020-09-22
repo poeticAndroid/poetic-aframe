@@ -377,7 +377,7 @@
       let loco = document.querySelector("[locomotion]").components.locomotion
       let pos = this.el.object3D.position
       console.log("starting at", pos)
-      loco.moveTo(pos.x, pos.y, pos.z, true)
+      // loco.moveTo(pos.x, pos.y, pos.z, true)
       
       requestAnimationFrame(() => {
         loco.moveTo(pos.x, pos.y, pos.z, true)
