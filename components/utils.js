@@ -68,9 +68,7 @@ AFRAME.AEntity.prototype.ensurePlayer = function () {
   let cam = this.ensure("a-camera", "a-camera", { "look-controls": { pointerLockEnabled: true } })
   cam.ensure(".tracker", "a-entity", { class: "tracker" })
   this.ensure(".left-hand", "a-entity", { "class": "left-hand", "hand-controls": { hand: "left" } })
-  // ;("left")
   this.ensure(".right-hand", "a-entity", { "class": "right-hand", "hand-controls": { hand: "right" } })
-  // ;("right")
 }
 
 Element.prototype.ensure = function (selector, name = selector, attrs = {}) {

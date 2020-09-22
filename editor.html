@@ -39,7 +39,7 @@
   <br />
   <button id="clearBtn">Clear</button>
   <button id="loadBtn">Load</button>
-  <button id="runBtn">Run</button>
+  <button id="editBtn">Edit</button>
   <script>
     let txt = document.querySelector("textarea")
     txt.addEventListener("focus", () => {
@@ -70,9 +70,16 @@
       }
     })
 
-    let runBtn = document.querySelector("#runBtn")
-    runBtn.addEventListener("click", () => {
-      document.body.innerHTML = '<a-scene loading-screen><a-entity include="scenes/_assets.html"></a-entity><a-entity locomotion grabber><a-torus-knot editor scale=".0625 .0625 .03125" position="0 1 -.25"></a-torus-knot></a-entity>'
+    let editBtn = document.querySelector("#editBtn")
+    editBtn.addEventListener("click", () => {
+      document.body.innerHTML = `
+        <a-scene loading-screen>
+          <a-entity include="scenes/_assets.html"></a-entity>
+          <a-entity locomotion grabber>
+            <a-torus-knot editor scale=".0625 .0625 .03125" position="0 1 -.25"></a-torus-knot>
+          </a-entity>
+        </a-scene>
+      `
     })
 
     async function load(url) {
