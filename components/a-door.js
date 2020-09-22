@@ -14,7 +14,6 @@
     init: function () {
       this._closedAng = this.el.components.rotation.data.y
       this._knob = this.el.ensure(".door-knob", "a-box", { class: "door-knob", depth: 0.25, grabbable: { dynamicBody: false }, visible: false })
-      this._knobRad = parseFloat(this._knob.getAttribute("radius"))
       this._grabber = document.querySelector("[grabber]")
 
       this.toggleOpen = this.toggleOpen.bind(this)
@@ -31,7 +30,8 @@
       this._knob.setAttribute("height", this._width)
       this._maxAng = this._closedAng + Math.abs(this.data.push)
       this._minAng = this._closedAng - Math.abs(this.data.pull)
-      this.el.setAttribute("rotation", { x: 0, y: this._closedAng + this.data.open, z: 0 })
+      if (this.el.isPlaying)
+        this.el.setAttribute("rotation", { x: 0, y: this._closedAng + this.data.open, z: 0 })
     },
 
     tick: function (time, timeDelta) {
@@ -63,6 +63,18 @@
       } else {
         this._knob.object3D.position.set(0, 0, -.5)
       }
+    },
+
+    pause: function () {
+      this.el.components.rotation.data.y = this._closedAng
+      let wall = this.el.querySelector("[wall]")
+      while (wall) {
+        wall.removeAttribute("wall")
+        wall = this.el.querySelector("[wall]")
+      }
+      let el = this.el.querySelector("*")
+      el.setAttribute("material", "transparent", true)
+      el.setAttribute("material", "opacity", .75)
     }
   })
 }.call(this))
