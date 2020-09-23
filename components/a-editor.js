@@ -141,6 +141,8 @@
           m.src.setAttribute("scale", str)
         else
           m.src.removeAttribute("scale")
+        if (!m.src.getAttribute("class"))
+          m.src.removeAttribute("class")
       }
       // this._src.flushToDOM(true)
       localStorage.setItem("#world", this._src.outerHTML.replace(/=""/g, "").trim())

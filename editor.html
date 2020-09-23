@@ -55,7 +55,10 @@
   <script>
     let txt = document.querySelector("textarea")
     txt.addEventListener("focus", () => {
-      txt.value = localStorage.getItem("#world").replace(/><a-/gi, ">\n  <a-").trim()
+      if (localStorage.getItem("#world"))
+        txt.value = localStorage.getItem("#world").replace(/><a-/gi, ">\n  <a-").trim()
+      else
+        load("scenes/new.html")
     })
     txt.addEventListener("change", () => {
       localStorage.setItem("#world", txt.value.trim())
@@ -77,13 +80,13 @@
 
     let copyBtn = document.querySelector("#copyBtn")
     copyBtn.addEventListener("click", () => {
-      navigator.clipboard.writeText(localStorage.getItem("#world"))
+      navigator.clipboard.writeText(txt.value)
     })
 
     let editBtn = document.querySelector("#editBtn")
     editBtn.addEventListener("click", () => {
       let grid = 1 / parseFloat(document.querySelector("#densTxt").value)
-      let rot =  parseFloat(document.querySelector("#rotTxt").value)
+      let rot = parseFloat(document.querySelector("#rotTxt").value)
       document.body.innerHTML = `
         <a-scene>
           <a-entity include="scenes/_assets.html"></a-entity>
