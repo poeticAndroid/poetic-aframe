@@ -106,7 +106,7 @@
 
     load: function () {
       if (!this.el.sceneEl.querySelector("a-assets")) {
-        let to = setTimeout(this.load, 1024)
+        let to = setTimeout(this.load, 256)
         return
       }
 
