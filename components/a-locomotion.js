@@ -379,14 +379,14 @@
       console.log("starting at", pos)
       // loco.moveTo(pos.x, pos.y, pos.z, true)
       
-      requestAnimationFrame(() => {
+      setTimeout(() => {
         loco.moveTo(pos.x, pos.y, pos.z, true)
         setTimeout(() => {
           loco.moveTo(pos.x, pos.y, pos.z, true)
           setTimeout(() => {
             if (loco.floorOffset) loco.toggleCrouch()
-          }, 1024)
-        }, 1024)
+          }, 256)
+        }, 256)
       })
     }
   })
