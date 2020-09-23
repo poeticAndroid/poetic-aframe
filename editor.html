@@ -19,7 +19,7 @@
       background-color: transparent;
       color: inherit;
       width: 90vw;
-      height: 90vh;
+      height: 80vh;
     }
   </style>
   <script type="text/javascript" src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
@@ -35,11 +35,15 @@
 </head>
 
 <body>
-  <textarea autofocus></textarea>
-  <br />
-  <button id="clearBtn">Clear</button>
-  <button id="loadBtn">Load</button>
-  <button id="editBtn">Edit</button>
+  <p>
+    <button id="loadBtn">💾 Load</button>
+    <button id="copyBtn">📋 Copy</button>
+    <button id="editBtn">✏ Edit</button>
+    <button id="runBtn">👟 Run</button>
+  </p>
+  <p>
+    <textarea autofocus></textarea>
+  </p>
   <script>
     let txt = document.querySelector("textarea")
     txt.addEventListener("focus", () => {
@@ -53,16 +57,9 @@
     })
 
 
-    let clearBtn = document.querySelector("#clearBtn")
-    clearBtn.addEventListener("click", () => {
-      if (confirm("Are you sure you wish to clear?")) {
-        load("scenes/new.html")
-      }
-    })
-
     let loadBtn = document.querySelector("#loadBtn")
     loadBtn.addEventListener("click", () => {
-      let url = prompt("Enter scene to load")
+      let url = prompt("Enter name of scene to load", "new")
       if (!url.includes("/")) url = "scenes/" + url
       if (!url.includes(".")) url = url + ".html"
       if (url) {
@@ -70,16 +67,33 @@
       }
     })
 
+    let copyBtn = document.querySelector("#copyBtn")
+    copyBtn.addEventListener("click", () => {
+      navigator.clipboard.writeText(localStorage.getItem("#world"))
+    })
+
     let editBtn = document.querySelector("#editBtn")
     editBtn.addEventListener("click", () => {
       document.body.innerHTML = `
-        <a-scene loading-screen>
+        <a-scene>
           <a-entity include="scenes/_assets.html"></a-entity>
           <a-entity locomotion grabber>
-            <a-torus-knot editor scale=".0625 .0625 .03125" position="0 1 -.25"></a-torus-knot>
+            <a-torus-knot editor scale=".0625 .0625 .0625" position="0 1 -.25"></a-torus-knot>
           </a-entity>
         </a-scene>
       `
+    })
+
+    let runBtn = document.querySelector("#runBtn")
+    runBtn.addEventListener("click", () => {
+      document.body.innerHTML = `
+        <a-scene>
+          <a-entity include="scenes/_assets.html"></a-entity>
+          <a-entity locomotion grabber></a-entity>
+          <a-entity id="world"></a-entity>
+        </a-scene>
+      `
+      runWhenReady()
     })
 
     async function load(url) {
@@ -87,6 +101,15 @@
       let html = await (await fetch(url)).text()
       localStorage.setItem("#world", html.trim())
       txt.focus()
+    }
+
+    function runWhenReady() {
+      if (!document.querySelector("a-assets")) {
+        let to = setTimeout(runWhenReady, 1024)
+        return
+      }
+      let world = document.querySelector("#world")
+      world.outerHTML = localStorage.getItem("#world")
     }
 
   </script>

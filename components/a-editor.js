@@ -13,7 +13,7 @@
       this._div = document.body.ensure("template")
       this._src = this._parseHTML('<a-entity id="world">\n</a-entity>')
       this._world = this.el.sceneEl.ensure("#world", "a-entity", { id: "world" })
-      this._anchor = this.el.ensure(".editor-anchor", "a-box", { class: "editor-anchor" })
+      this._anchor = this.el.ensure(".editor-anchor", "a-entity", { class: "editor-anchor" })
       this._angularSize = new THREE.Vector3()
 
       this.load = this.load.bind(this)
@@ -126,15 +126,24 @@
       for (let i = 0; i < this._map.length; i++) {
         let m = this._map[i]
         // m.world.flushToDOM()
-        if (m.world.getAttribute("position"))
-          m.src.setAttribute("position", AFRAME.utils.coordinates.stringify(m.world.getAttribute("position")))
-        if (m.world.getAttribute("rotation"))
-          m.src.setAttribute("rotation", AFRAME.utils.coordinates.stringify(m.world.getAttribute("rotation")))
-        if (m.world.getAttribute("scale"))
-          m.src.setAttribute("scale", AFRAME.utils.coordinates.stringify(m.world.getAttribute("scale")))
+        let str = AFRAME.utils.coordinates.stringify(m.world.getAttribute("position"))
+        if (str && str != "0 0 0")
+          m.src.setAttribute("position", str)
+        else
+          m.src.removeAttribute("position")
+        str = AFRAME.utils.coordinates.stringify(m.world.getAttribute("rotation"))
+        if (str && str != "0 0 0")
+          m.src.setAttribute("rotation", str)
+        else
+          m.src.removeAttribute("rotation")
+        str = AFRAME.utils.coordinates.stringify(m.world.getAttribute("scale"))
+        if (str && str != "1 1 1")
+          m.src.setAttribute("scale", str)
+        else
+          m.src.removeAttribute("scale")
       }
       // this._src.flushToDOM(true)
-      localStorage.setItem("#world", this._src.outerHTML)
+      localStorage.setItem("#world", this._src.outerHTML.replace(/=""/g, "").trim())
     },
 
     _grab: function (e) {
