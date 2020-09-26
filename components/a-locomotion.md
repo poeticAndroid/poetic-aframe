@@ -12,30 +12,31 @@ Add the `locomotion` component to your player rig like so:
 
 This makes it possible to move around the using the following controls.
 
-| Action                    | Controller             | Desktop | Touch            |
-| ------------------------- | ---------------------- | ------- | ---------------- |
-| Move                      | Left stick             | WASD    |
-| Rotate                    | Right stick left/right | Mouse   | Swipe left/right |
-| Teleport                  | Right stick up         | Space   | Swipe up         |
-| Crouch                    | Right stick down       | C       | Swipe down       |
-| Toggle quantized movement | Click left stick       |
-| Toggle quantized rotation | Click right stick      |
+| Action                                  | Controller             | Desktop | Touch            |
+| --------------------------------------- | ---------------------- | ------- | ---------------- |
+| Move                                    | Left stick             | WASD    |
+| Rotate                                  | Right stick left/right | Mouse   | Swipe left/right |
+| Teleport                                | Right stick up         | Space   | Swipe up         |
+| Crouch                                  | Right stick down       | C       | Swipe down       |
+| Toggle quantized movement (or God mode) | Click left stick       |
+| Toggle quantized rotation               | Click right stick      |
 
 ### Properties
 
-| Property         | Description                    | Default |
-| ---------------- | ------------------------------ | ------- |
-| acceleration     | Speed of movement              | 65      |
-| rotationSpeed    | Speed of rotation              | 1       |
-| quantizeMovement | Quantize movement              | false   |
-| quantizeRotation | Quantize rotation              | true    |
-| teleportDistance | Maximum teleportation distance | 3       |
+| Property         | Description                                                      | Default |
+| ---------------- | ---------------------------------------------------------------- | ------- |
+| acceleration     | Speed of movement                                                | 65      |
+| rotationSpeed    | Speed of rotation                                                | 1       |
+| quantizeMovement | Quantize movement                                                | false   |
+| quantizeRotation | Quantize rotation                                                | true    |
+| teleportDistance | Maximum teleportation distance                                   | 3       |
+| godMode          | Enable ability to move through walls and floors in any direction | false   |
 
 ### Methods
 
 | Method              | Description                                                           |
 | ------------------- | --------------------------------------------------------------------- |
-| moveBy(x,z)         | Move by given distance on X and Z axes.                               |
+| moveBy(x,y,z, safe) | Move by given vector. Ignore walls in the way, if `safe` is `true`.   |
 | moveTo(x,y,z, safe) | Move to given position. Ignore walls in the way, if `safe` is `true`. |
 | rotateBy(angle)     | Rotate by given angle.                                                |
 | toggleCrouch()      | Toggle crouch mode.                                                   |
