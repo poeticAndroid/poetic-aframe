@@ -8,7 +8,8 @@
       rotationSpeed: { type: "number", default: 1 },
       quantizeMovement: { type: "boolean", default: false },
       quantizeRotation: { type: "boolean", default: true },
-      teleportDistance: { type: "number", default: 3 }
+      teleportDistance: { type: "number", default: 3 },
+      godMode: { type: "boolean", default: false }
     },
 
     init: function () {
@@ -71,6 +72,8 @@
     update: function () {
       // Do something when component's data is updated.
       this._camera.setAttribute("wasd-controls", "acceleration", this.data.acceleration)
+      this._allowGod = this.data.godMode
+      this._godMode = this.data.godMode
     },
 
     remove: function () {
@@ -107,27 +110,29 @@
       this._bumper.setAttribute("raycaster", "far", delta.length() + 0.125)
       this._bumper.setAttribute("raycaster", "direction", delta.multiplyScalar(-1).normalize())
 
-      this._vehicle.components.raycaster.refreshObjects()
-      if (this._vehicle.components.raycaster.intersections[0]) {
-        let p = this._vehicle.components.raycaster.intersections[0].point
-        this.moveTo(this.playerPos.x, Math.max(p.y, this.playerPos.y - 0.1), this.playerPos.z)
-      } else {
-        this.moveTo(this.playerPos.x, this.playerPos.y - 0.1, this.playerPos.z)
-      }
-      this._bumper.setAttribute("raycaster", "autoRefresh", false)
-      this._bumper.components.raycaster.refreshObjects()
-      if (this._bumper.components.raycaster.intersections[0]) {
-        let int = this._bumper.components.raycaster.intersections[0]
-        matrix.getNormalMatrix(int.object.el.object3D.matrixWorld)
-        delta
-          .copy(int.face.normal)
-          .applyMatrix3(matrix)
-          .normalize()
-          .multiplyScalar(0.25)
-          .add(int.point)
-        this.moveTo(delta.x, this.safePos.y, delta.z, true)
-      } else {
-        this.safePos.lerp(this.playerPos, 0.125)
+      if (!this._godMode) {
+        this._vehicle.components.raycaster.refreshObjects()
+        if (this._vehicle.components.raycaster.intersections[0]) {
+          let p = this._vehicle.components.raycaster.intersections[0].point
+          this.moveTo(this.playerPos.x, Math.max(p.y, this.playerPos.y - 0.1), this.playerPos.z)
+        } else {
+          this.moveTo(this.playerPos.x, this.playerPos.y - 0.1, this.playerPos.z)
+        }
+        this._bumper.setAttribute("raycaster", "autoRefresh", false)
+        this._bumper.components.raycaster.refreshObjects()
+        if (this._bumper.components.raycaster.intersections[0]) {
+          let int = this._bumper.components.raycaster.intersections[0]
+          matrix.getNormalMatrix(int.object.el.object3D.matrixWorld)
+          delta
+            .copy(int.face.normal)
+            .applyMatrix3(matrix)
+            .normalize()
+            .multiplyScalar(0.25)
+            .add(int.point)
+          this.moveTo(delta.x, this.safePos.y, delta.z, true)
+        } else {
+          this.safePos.lerp(this.playerPos, 0.125)
+        }
       }
       this._vehicle.object3D.position.set(this._camera.object3D.position.x, this._vehicle.object3D.position.y, this._camera.object3D.position.z)
 
@@ -147,7 +152,12 @@
           rot += Math.round(gamepad.axes[2])
           alt += Math.round(gamepad.axes[3])
           if (gamepad.buttons[10].pressed) {
-            if (this._btnDown == 0) this.data.quantizeMovement = !this.data.quantizeMovement
+            if (this._allowGod) {
+              if (this._btnDown == 0) this._godMode = !this._godMode
+            }
+            else {
+              if (this._btnDown == 0) this.data.quantizeMovement = !this.data.quantizeMovement
+            }
             this._btnDown = 3
           }
           if (gamepad.buttons[11].pressed) {
@@ -228,30 +238,28 @@
       }
       this._alt = alt
       dir.multiplyScalar(mk)
+      let fwd = dir.y
+      if (this._godMode) dir.y = 0
       pivot.set(0, 0)
       dir.rotateAround(pivot, camdir.angle())
       this.rotateBy(rot * rk)
-      this.moveTo(this.playerPos.x + dir.x, this.playerPos.y, this.playerPos.z + dir.y)
+      this.moveBy(dir.x, 0, dir.y)
+      if (this._godMode)
+        this.moveBy(this.cameraDir.x * fwd, this.cameraDir.y * fwd, this.cameraDir.z * fwd)
     },
 
-    moveBy: function (x, z) {
+    moveBy: function (x, y, z, safe) {
       let delta = THREE.Vector3.temp()
-      delta.set(x, 0, z)
+      delta.set(x, y, z)
 
       this.playCenter.add(delta)
       this.playerPos.add(delta)
       this.cameraPos.add(delta)
       this.el.object3D.position.add(delta)
+      if (safe || this._godMode) this.safePos.copy(this.playerPos)
     },
     moveTo: function (x, y, z, safe) {
-      let delta = THREE.Vector3.temp()
-      if (safe) this.safePos.set(x, y, z)
-      delta.set(x - this.playerPos.x, y - this.playerPos.y, z - this.playerPos.z)
-
-      this.playCenter.add(delta)
-      this.playerPos.add(delta)
-      this.cameraPos.add(delta)
-      this.el.object3D.position.add(delta)
+      this.moveBy(x - this.playerPos.x, y - this.playerPos.y, z - this.playerPos.z, safe)
     },
 
     rotateBy: function (angle) {
@@ -311,7 +319,12 @@
 
     _buttonChanged: function (e) {
       if (e.srcElement.getAttribute("hand-controls").hand === "left") {
-        if (e.detail.id == 3 && e.detail.state.pressed) this.data.quantizeMovement = !this.data.quantizeMovement
+        if (this._allowGod) {
+          if (e.detail.id == 3 && e.detail.state.pressed) this._godMode = !this._godMode
+        }
+        else {
+          if (e.detail.id == 3 && e.detail.state.pressed) this.data.quantizeMovement = !this.data.quantizeMovement
+        }
       } else {
         if (e.detail.id == 3 && e.detail.state.pressed) this.data.quantizeRotation = !this.data.quantizeRotation
       }
@@ -378,16 +391,13 @@
       let pos = this.el.object3D.position
       console.log("starting at", pos)
       // loco.moveTo(pos.x, pos.y, pos.z, true)
-      
+
       setTimeout(() => {
         loco.moveTo(pos.x, pos.y, pos.z, true)
         setTimeout(() => {
-          loco.moveTo(pos.x, pos.y, pos.z, true)
-          setTimeout(() => {
-            if (loco.floorOffset) loco.toggleCrouch()
-          }, 256)
+          if (loco.floorOffset) loco.toggleCrouch()
         }, 256)
-      })
+      }, 256)
     }
   })
 }.call(this))

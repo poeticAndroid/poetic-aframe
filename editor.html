@@ -90,7 +90,7 @@
       document.body.innerHTML = `
         <a-scene>
           <a-entity include="scenes/_assets.html"></a-entity>
-          <a-entity locomotion grabber>
+          <a-entity locomotion="godMode:true" grabber>
             <a-torus-knot editor="gridSize: ${grid} ${grid} ${grid};rotationSteps: ${rot} ${rot} ${rot};" scale=".0625 .0625 .0625" position="0 1 -.25"></a-torus-knot>
           </a-entity>
         </a-scene>

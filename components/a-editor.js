@@ -68,7 +68,9 @@
       // srcEl = srcEl.cloneNode(true)
       // this._div.innerHTML = srcEl.outerHTML.trim()
       let worldEl = this._parseHTML(srcEl.outerHTML)
-      srcEl.classList.remove("editable")
+      srcEl.removeAttribute("position")
+      srcEl.removeAttribute("rotation")
+      srcEl.removeAttribute("scale")
       worldEl.classList.add("editable")
       this._map.push({
         src: srcEl,
