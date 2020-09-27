@@ -15,6 +15,7 @@
       this._world = this.el.sceneEl.ensure("#world", "a-entity", { id: "world" })
       this._anchor = this.el.ensure(".editor-anchor", "a-entity", { class: "editor-anchor" })
       this._angularSize = new THREE.Vector3()
+      this._history = []
 
       this.load = this.load.bind(this)
       this.save = this.save.bind(this)
@@ -51,7 +52,7 @@
     },
 
     tick: function (time, timeDelta) {
-      if (this._grabbed && this._grabbed !== true) {
+      if (this._grabbed && this._grabbed !== true && this._grabbed.copyWorldPosRot) {
         this._grabbed.copyWorldPosRot(this._anchor)
         if (this._grabbed.body) {
           this._grabbed.body.sleep()
@@ -79,6 +80,10 @@
       worldEl.addEventListener("loaded", () => { worldEl.pause() })
       this._src.appendChild(srcEl)
       this._world.appendChild(worldEl)
+      this._history.push({
+        cmd: "remove",
+        el: srcEl
+      })
     },
     findEntity: function (el) {
       let index = null
@@ -100,6 +105,10 @@
       }
       if (typeof index === "number") {
         let m = this._map[index]
+        this._history.push({
+          cmd: "add",
+          html: m.src.outerHTML
+        })
         m.src.parentNode.removeChild(m.src)
         m.world.parentNode.removeChild(m.world)
         this._map.splice(index, 1)
@@ -115,7 +124,6 @@
       while (this._map.length) this.removeEntity(this._map.length - 1)
       let src = localStorage.getItem("#world")
       if (!src) return
-      this._div.innerHTML = src.trim()
       let scene = this._parseHTML(src)
       for (let ent of scene.childNodes) {
         if (ent instanceof Element) {
@@ -124,10 +132,9 @@
       }
     },
     save: function () {
-      let rot = THREE.Vector3.temp()
       for (let i = 0; i < this._map.length; i++) {
         let m = this._map[i]
-        // m.world.flushToDOM()
+        let oldHtml = m.src.outerHTML
         let str = AFRAME.utils.coordinates.stringify(m.world.getAttribute("position"))
         if (str && str != "0 0 0")
           m.src.setAttribute("position", str)
@@ -145,19 +152,68 @@
           m.src.removeAttribute("scale")
         if (!m.src.getAttribute("class"))
           m.src.removeAttribute("class")
+        let newHtml = m.src.outerHTML
+        if (newHtml !== oldHtml) {
+          this._history.push({
+            cmd: "edit",
+            el: m.src,
+            html: oldHtml,
+            _html:newHtml
+          })
+        }
       }
-      // this._src.flushToDOM(true)
       localStorage.setItem("#world", this._src.outerHTML.replace(/=""/g, "").trim())
     },
 
+    undo: function () {
+      if (this._history.length == 0) return
+      let action = this._history.pop()
+      console.log("Undoing...", this._history.length, action)
+      let len = this._history.length
+      switch (action.cmd) {
+        case "remove":
+          this.removeEntity(action.el)
+          break
+        case "add":
+          this.addEntity(action.html)
+          break
+        case "edit":
+          let m = this._map[this.findEntity(action.el)]
+          if (!m) return
+          let child = this._parseHTML(action.html)
+          let def = ["0 0 0", "0 0 0", "1 1 1"]
+          for (let atr of ["position", "rotation", "scale"]) {
+            let _def = def.shift()
+            if (child.getAttribute(atr)) {
+              m.world.setAttribute(atr, child.getAttribute(atr))
+              m.src.setAttribute(atr, child.getAttribute(atr))
+            } else {
+              m.world.setAttribute(atr, _def)
+              m.src.removeAttribute(atr)
+            }
+          }
+          // this.save()
+          break
+      }
+      while (this._history.length > len) this._history.pop()
+    },
+
     _grab: function (e) {
+      this.save()
       this._grabbed = true
       setTimeout(() => {
         this._grabbed = false
+        this._undoBtn = 0
+        this._history = []
       }, 256)
     },
 
     _useDown: function (e) {
+      if (e.detail.button) this._undoBtn++
+      if (this._undoBtn > 1) {
+        if (this._grabbed) this.save()
+        this._grabbed = true
+      }
       if (this._grabbed) return
       let ray = this.el.components.raycaster
       ray.refreshObjects()
@@ -173,6 +229,8 @@
       }
     },
     _useUp: function (e) {
+      if (this._undoBtn > 1) this.undo()
+      if (this._undoBtn > 0) this._undoBtn--
       if (this._grabbed === true) this._grabbed = false
       if (this._grabbed) {
         switch (e.detail.button) {
@@ -214,7 +272,7 @@
     },
 
     _parseHTML: function (html) {
-      this._div.innerHTML = html
+      this._div.innerHTML = html.trim()
       return document.importNode(this._div.content, true).firstChild
     }
   })
