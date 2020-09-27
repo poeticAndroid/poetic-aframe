@@ -351,6 +351,9 @@
       if (e.code == "KeyC") {
         this.toggleCrouch()
       }
+      if (this._allowGod && e.code == "KeyG") {
+        this._godMode = !this._godMode
+      }
     },
 
     _keyUp: function (e) {
