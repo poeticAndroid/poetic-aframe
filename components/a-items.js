@@ -131,12 +131,18 @@
       for (i = 0, len = navigator.getGamepads().length; i < len; i++) {
         gamepad = navigator.getGamepads()[i]
         if (gamepad) {
+          if (gamepad.buttons[0].value > 0.75 && !this._gamepadDelta[0]) this.useDown("head", 1)
+          if (gamepad.buttons[1].value > 0.75 && !this._gamepadDelta[1]) this.useDown("head", 2)
+          if (!(gamepad.buttons[0].value > 0.75) && this._gamepadDelta[0]) this.useUp("head", 1)
+          if (!(gamepad.buttons[1].value > 0.75) && this._gamepadDelta[1]) this.useUp("head", 2)
           if (gamepad.buttons[4].value > 0.75 && !this._gamepadDelta[4]) this.toggleGrab()
           if (gamepad.buttons[5].value > 0.75 && !this._gamepadDelta[5]) this.toggleGrab()
           if (gamepad.buttons[6].value > 0.75 && !this._gamepadDelta[6]) this.useDown()
           if (gamepad.buttons[7].value > 0.75 && !this._gamepadDelta[7]) this.useDown()
           if (!(gamepad.buttons[6].value > 0.75) && this._gamepadDelta[6]) this.useUp()
           if (!(gamepad.buttons[7].value > 0.75) && this._gamepadDelta[7]) this.useUp()
+          this._gamepadDelta[0] = gamepad.buttons[0].value > 0.75
+          this._gamepadDelta[1] = gamepad.buttons[1].value > 0.75
           this._gamepadDelta[4] = gamepad.buttons[4].value > 0.75
           this._gamepadDelta[5] = gamepad.buttons[5].value > 0.75
           this._gamepadDelta[6] = gamepad.buttons[6].value > 0.75
