@@ -13,9 +13,12 @@
       this._div = document.body.ensure("template")
       this._src = this._parseHTML('<a-entity id="world">\n</a-entity>')
       this._world = this.el.sceneEl.ensure("#world", "a-entity", { id: "world" })
+      this._worldAnchor = this._world.ensure(".editor-anchors", "a-entity", { class: "editor-anchors" })
       this._anchor = this.el.ensure(".editor-anchor", "a-entity", { class: "editor-anchor" })
       this._angularSize = new THREE.Vector3()
       this._history = []
+      this._anchors = []
+      this._grabbed = []
 
       this.load = this.load.bind(this)
       this.save = this.save.bind(this)
@@ -52,13 +55,57 @@
     },
 
     tick: function (time, timeDelta) {
-      if (this._grabbed && this._grabbed !== true && this._grabbed.copyWorldPosRot) {
-        this._grabbed.copyWorldPosRot(this._anchor)
-        if (this._grabbed.body) {
-          this._grabbed.body.sleep()
-          this._grabbed.body.velocity.set(0, 0, 0)
-          this._grabbed.body.angularVelocity.set(0, 0, 0)
+      if (this._selecting) {
+
+        let ray = this.el.components.raycaster
+        ray.refreshObjects()
+        let int = ray.intersections[0]
+        if (int) {
+          let grab = int.object.el
+          if (!grab) return
+          while (!grab.classList.contains("editable")) {
+            grab = grab.parentNode
+            if (!grab) return
+          }
+          this._anchor.copyWorldPosRot(grab)
+          this._worldAnchor.copyWorldPosRot(grab)
+          if (this._grabbed.indexOf(grab) < 0) {
+            this._grabbed.push(grab)
+            grab.pause()
+            let oldScale = JSON.parse(JSON.stringify(grab.getAttribute("scale")))
+            let newScale = JSON.parse(JSON.stringify(oldScale))
+            newScale.x*=1.1
+            newScale.y*=1.1
+            newScale.z *= 1.1
+            grab.setAttribute("scale", newScale)
+            setTimeout(() => {
+              grab.setAttribute("scale", oldScale)
+            }, 256)
+            console.log("added to selection", this._grabbed.length)
+          }
         }
+
+        if (this._grabbed.length > this._anchors.length) {
+          let anch = document.createElement("a-entity")
+          this._worldAnchor.appendChild(anch)
+          this._anchors.push(anch)
+        }
+      } else {
+        for (let i = 0; i < this._grabbed.length; i++) {
+          let grab = this._grabbed[i]
+          let anch = this._anchors[i]
+          if (grab && grab.copyWorldPosRot) {
+            grab.copyWorldPosRot(anch)
+            if (grab.body) {
+              grab.body.sleep()
+              grab.body.velocity.set(0, 0, 0)
+              grab.body.angularVelocity.set(0, 0, 0)
+            }
+          }
+        }
+
+        this._worldAnchor.copyWorldPosRot(this._anchor)
+        this._snap(this._worldAnchor)
       }
     },
 
@@ -158,7 +205,7 @@
             cmd: "edit",
             el: m.src,
             html: oldHtml,
-            _html:newHtml
+            _html: newHtml
           })
         }
       }
@@ -202,7 +249,8 @@
       this.save()
       this._grabbed = true
       setTimeout(() => {
-        this._grabbed = false
+        this._selecting = false
+        this._grabbed = []
         this._undoBtn = 0
         this._history = []
       }, 256)
@@ -211,64 +259,75 @@
     _useDown: function (e) {
       if (e.detail.button) this._undoBtn++
       if (this._undoBtn > 1) {
-        if (this._grabbed) this.save()
-        this._grabbed = true
-      }
-      if (this._grabbed) return
-      let ray = this.el.components.raycaster
-      ray.refreshObjects()
-      let int = ray.intersections[0]
-      if (int) {
-        this._grabbed = int.object.el
-        while (!this._grabbed.classList.contains("editable")) {
-          this._grabbed = this._grabbed.parentNode
-          if (!this._grabbed) return
-        }
-        this._grabbed.pause()
-        this._anchor.copyWorldPosRot(this._grabbed)
+        if (this._grabbed.length) this.save()
+        this._selecting = false
+        this._grabbed = []
+      } else {
+        this._selecting = this._grabbed.length === 0
       }
     },
     _useUp: function (e) {
+      if (this._selecting) {
+        for (let i = 0; i < this._grabbed.length; i++) {
+          let grab = this._grabbed[i]
+          let anch = this._anchors[i]
+          if (anch && anch.copyWorldPosRot) {
+            anch.copyWorldPosRot(grab)
+          }
+        }
+      }
       if (this._undoBtn > 1) this.undo()
       if (this._undoBtn > 0) this._undoBtn--
-      if (this._grabbed === true) this._grabbed = false
-      if (this._grabbed) {
+
+      if (this._grabbed.length) {
         switch (e.detail.button) {
           case 1:
-            let i = this.findEntity(this._grabbed)
-            let html = this._grabbed.outerHTML
-            if (i != null) {
-              html = this._map[i].src.outerHTML
-            } else {
-              html = html.replace(/\ velocity\=\"\"/gi, "")
+            for (let i = 0; i < this._grabbed.length; i++) {
+              let grab = this._grabbed[i]
+              let j = this.findEntity(grab)
+              let html = grab.outerHTML
+              if (j != null) {
+                html = this._map[j].src.outerHTML
+              } else {
+                html = html.replace(/\ velocity\=\"\"/gi, "")
+              }
+              let e = this._map.length
+              this.addEntity(html)
+              let m = this._map[e]
+              grab.emit("place")
+              this._grabbed[i] = m.world
             }
-            let e = this._map.length
-            this.addEntity(html)
-            let m = this._map[e]
-            this._place()
-            this._grabbed = m.world
             break
           case 2:
-            this.removeEntity(this._grabbed)
-            this._grabbed = null
+            let grab
+            while (grab = this._grabbed.pop()) {
+              this.removeEntity(grab)
+            }
             break
           default:
-            this._place()
-            this._grabbed = null
+            if (!this._selecting)
+              this._place()
         }
         clearTimeout(this._saveTO)
         this._saveTO = setTimeout(this.save, 1024)
       }
+      this._selecting = false
       let ray = this.el.components.raycaster
       ray.refreshObjects()
     },
 
     _place: function () {
+      let grab
+      while (grab = this._grabbed.pop()) {
+        grab.emit("place")
+      }
+    },
+
+    _snap: function (el) {
       let rot = THREE.Vector3.temp()
-      this._grabbed.object3D.position.divide(this.data.gridSize).round().multiply(this.data.gridSize)
-      rot.copy(this._grabbed.getAttribute("rotation")).divide(this._angularSize).round().multiply(this._angularSize)
-      this._grabbed.setAttribute("rotation", AFRAME.utils.coordinates.stringify(rot))
-      this._grabbed.emit("place")
+      el.object3D.position.divide(this.data.gridSize).round().multiply(this.data.gridSize)
+      rot.copy(el.getAttribute("rotation")).divide(this._angularSize).round().multiply(this._angularSize)
+      el.setAttribute("rotation", AFRAME.utils.coordinates.stringify(rot))
     },
 
     _parseHTML: function (html) {
