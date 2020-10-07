@@ -49,6 +49,7 @@
       })
       if (!this.el.getAttribute("raycaster")) this.el.setAttribute("raycaster", {
         objects: ".editable, .editable *",
+        far: 1,
         autoRefresh: false,
         showLine: true
       })
@@ -74,8 +75,8 @@
             grab.pause()
             let oldScale = JSON.parse(JSON.stringify(grab.getAttribute("scale")))
             let newScale = JSON.parse(JSON.stringify(oldScale))
-            newScale.x*=1.1
-            newScale.y*=1.1
+            newScale.x *= 1.1
+            newScale.y *= 1.1
             newScale.z *= 1.1
             grab.setAttribute("scale", newScale)
             setTimeout(() => {
@@ -324,10 +325,12 @@
     },
 
     _snap: function (el) {
-      let rot = THREE.Vector3.temp()
+      let rot = THREE.Vector3.reuse()
       el.object3D.position.divide(this.data.gridSize).round().multiply(this.data.gridSize)
       rot.copy(el.getAttribute("rotation")).divide(this._angularSize).round().multiply(this._angularSize)
       el.setAttribute("rotation", AFRAME.utils.coordinates.stringify(rot))
+
+      rot.recycle()
     },
 
     _parseHTML: function (html) {

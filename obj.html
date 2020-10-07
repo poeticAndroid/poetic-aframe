@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="obj.css" />
+  <title>OBJ rectifier</title>
+</head>
+
+<body>
+  <p>
+    <input type="number" id="cxInp" value="0" />
+    <input type="number" id="cyInp" value="0" />
+    <input type="number" id="czInp" value="0" />
+    <button id="centerBtn">Center</button> &nbsp;
+    <label for="sizeInp">Size:</label>
+    <input type="number" id="sizeInp" value="1" />
+    <button id="resizeBtn">Resize</button> &nbsp;
+    <button id="rotatexBtn">Rotate X 90&deg;</button>
+    <button id="rotateyBtn">Rotate Y 90&deg;</button>
+    <button id="mirrorBtn">Mirror</button>
+  </p>
+  <textarea cols="80" rows="20"></textarea>
+  <p>
+    <button id="plotxyBtn">Front</button>
+    <button id="plotzyBtn">Side</button>
+    <button id="plotxzBtn">Top</button>
+  </p>
+  <canvas width="512" height="512" ></canvas>
+  <script src="obj.js"></script>
+</body>
+
+</html>

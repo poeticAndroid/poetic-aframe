@@ -1,0 +1,24 @@
+html {
+  background-color: #111;
+  color: #eee;
+}
+
+canvas {
+  background-color: #000;
+  border: 1px solid #ff0;
+}
+
+body {
+  text-align: center;
+}
+
+input {
+  width: 4em;
+}
+
+textarea {
+  background-color: transparent;
+  color: inherit;
+  width: 90vw;
+  height: 40vh;
+}
