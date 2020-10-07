@@ -7,7 +7,7 @@ Component for making a scene editor.
 Add the `editor` component to an entity that represents your tool.
 
 ```html
-<a-torus-knot editor scale=".0625 .0625 .0625" position="0 1 0"></a-torus-knot>
+<a-gltf-model src="tool.glb" position="0 1 -.25" editor></a-gltf-model>
 ```
 
 ### Properties

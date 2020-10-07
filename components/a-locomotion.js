@@ -91,11 +91,11 @@
     },
 
     tick: function (time, timeDelta) {
-      let dir = THREE.Vector2.temp()
-      let camdir = THREE.Vector2.temp()
-      let pivot = THREE.Vector2.temp()
-      let delta = THREE.Vector3.temp()
-      let matrix = THREE.Matrix3.temp()
+      let dir = THREE.Vector2.reuse()
+      let camdir = THREE.Vector2.reuse()
+      let pivot = THREE.Vector2.reuse()
+      let delta = THREE.Vector3.reuse()
+      let matrix = THREE.Matrix3.reuse()
       let gamepad, i, l, len, mk, ref, rk
       this._cameraObj.object3D.updateMatrix()
       // Do something on every scene tick or frame.
@@ -246,10 +246,16 @@
       this.moveBy(dir.x, 0, dir.y)
       if (this._godMode)
         this.moveBy(this.cameraDir.x * fwd, this.cameraDir.y * fwd, this.cameraDir.z * fwd)
+      
+      dir.recycle()
+      camdir.recycle()
+      pivot.recycle()
+      delta.recycle()
+      matrix.recycle()
     },
 
     moveBy: function (x, y, z, safe) {
-      let delta = THREE.Vector3.temp()
+      let delta = THREE.Vector3.reuse()
       delta.set(x, y, z)
 
       this.playCenter.add(delta)
@@ -257,15 +263,17 @@
       this.cameraPos.add(delta)
       this.el.object3D.position.add(delta)
       if (safe || this._godMode) this.safePos.copy(this.playerPos)
+
+      delta.recycle()
     },
     moveTo: function (x, y, z, safe) {
       this.moveBy(x - this.playerPos.x, y - this.playerPos.y, z - this.playerPos.z, safe)
     },
 
     rotateBy: function (angle) {
-      let pos = THREE.Vector2.temp()
-      let pivot = THREE.Vector2.temp()
-      let delta = THREE.Vector3.temp()
+      let pos = THREE.Vector2.reuse()
+      let pivot = THREE.Vector2.reuse()
+      let delta = THREE.Vector3.reuse()
       pos.set(this.playerPos.x, this.playerPos.z)
       pivot.set(this.playCenter.x, this.playCenter.z)
       pos.rotateAround(pivot, -angle)
@@ -275,6 +283,10 @@
       this._vehicle.object3D.rotateY(-angle)
       this.el.object3D.position.add(delta)
       this.playCenter.add(delta)
+
+      pos.recycle()
+      pivot.recycle()
+      delta.recycle()
     },
 
     enableHands: function () {
@@ -298,12 +310,12 @@
     toggleCrouch: function () {
       if (this.floorOffset) {
         this.floorOffset = 0
-        this._vehicle.object3D.position.y = 0.5 - this.floorOffset
         this.moveTo(this.playerPos.x, this.playerPos.y + 1, this.playerPos.z)
       } else {
         this.floorOffset = -1
-        this._vehicle.object3D.position.y = 0.5 - this.floorOffset
+        this.moveTo(this.playerPos.x, this.playerPos.y - 1, this.playerPos.z)
       }
+      this._vehicle.object3D.position.y = 0.5 - this.floorOffset
     },
 
     _axisMove: function (e) {
@@ -396,9 +408,13 @@
       // loco.moveTo(pos.x, pos.y, pos.z, true)
 
       setTimeout(() => {
-        loco.moveTo(pos.x, pos.y, pos.z, true)
+        loco.moveTo(pos.x, pos.y + 1, pos.z, true)
         setTimeout(() => {
-          if (loco.floorOffset) loco.toggleCrouch()
+          if (loco.floorOffset) {
+            loco.toggleCrouch()
+            // document.querySelector("[locomotion]").object3D.position.y++
+            // loco.moveTo(pos.x, pos.y + 1, pos.z, true)
+          }
         }, 256)
       }, 256)
     }

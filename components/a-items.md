@@ -10,8 +10,14 @@ Add the `grabber` component to your player rig like so:
 <a-entity id="player" grabber></a-entity>
 ```
 
-This makes it possible to grab grabbable objects using the grab-button on a VR-controller, shoulder-button on gamepad, E-key on keyboard or long-tap on touchscreen.
-To use an item press the trigger on controller or gamepad, left mousebutton or tap on touchscreen.
+This makes it possible to grab and use grabbable objects using the following controls.
+
+| Action      | Controller           | Desktop      | Touch    |
+| ----------- | -------------------- | ------------ | -------- |
+| Grab/drop   | Grip/shoulder Button | E            | Long tap |
+| Primary use | Trigger              | Left click   | Tap      |
+| Secondary   | A                    | Right click  |
+| Tertiary    | B                    | Middle click |
 
 ## grabbable
 
@@ -41,14 +47,15 @@ These event are emitted on the grabbable as well as the hand that initiated the 
 
 ### Methods
 
-`hand` parameter is on of `"head"`(default), `"left"` or `"right"`.
+`hand` parameter is either `"head"`(default), `"left"` or `"right"`.
+`button` parameter is 0 - 2, where 0 is the primary use button.
 
-| Method           | Description                                           |
-| ---------------- | ----------------------------------------------------- |
-| toggleGrab(hand) | Drop if holding somethind, attempt to grab otherwise. |
-| grab(hand)       | Attempt to grab something.                            |
-| use(hand)        | Shortly use grabbable.                                |
-| useDown(hand)    | Start using grabbable.                                |
-| useUp(hand)      | Stop using grabbable.                                 |
-| drop(hand)       | Drop grabbable.                                       |
-| dropObject(el)   | Drop specified grabbable if held.                     |
+| Method                | Description                                           |
+| --------------------- | ----------------------------------------------------- |
+| toggleGrab(hand)      | Drop if holding something, attempt to grab otherwise. |
+| grab(hand)            | Attempt to grab something.                            |
+| use(hand, button)     | Shortly use grabbable.                                |
+| useDown(hand, button) | Start using grabbable.                                |
+| useUp(hand, button)   | Stop using grabbable.                                 |
+| drop(hand)            | Drop grabbable.                                       |
+| dropObject(el)        | Drop specified grabbable if held.                     |

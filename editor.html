@@ -5,27 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>#world</title>
-  <style>
-    html {
-      background-color: black;
-      color: yellow;
-    }
-
-    body {
-      text-align: center;
-    }
-
-    input {
-      width: 2em;
-    }
-
-    textarea {
-      background-color: transparent;
-      color: inherit;
-      width: 90vw;
-      height: 80vh;
-    }
-  </style>
+  <link rel="stylesheet" href="editor.css" />
   <script type="text/javascript" src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
   <script type="text/javascript"
     src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
@@ -54,82 +34,7 @@
   <p>
     <textarea autofocus></textarea>
   </p>
-  <script>
-    let txt = document.querySelector("textarea")
-    txt.addEventListener("focus", () => {
-      if (localStorage.getItem("#world"))
-        txt.value = localStorage.getItem("#world").replace(/><a-/gi, ">\n  <a-").trim()
-      else
-        load("scenes/new.html")
-    })
-    txt.addEventListener("change", () => {
-      localStorage.setItem("#world", txt.value.trim())
-    })
-    txt.addEventListener("keyup", () => {
-      localStorage.setItem("#world", txt.value.trim())
-    })
-
-
-    let loadBtn = document.querySelector("#loadBtn")
-    loadBtn.addEventListener("click", () => {
-      let url = prompt("Enter name of scene to load", "new")
-      if (!url.includes("/")) url = "scenes/" + url
-      if (!url.includes(".")) url = url + ".html"
-      if (url) {
-        load(url)
-      }
-    })
-
-    let copyBtn = document.querySelector("#copyBtn")
-    copyBtn.addEventListener("click", () => {
-      navigator.clipboard.writeText(txt.value)
-    })
-
-    let editBtn = document.querySelector("#editBtn")
-    editBtn.addEventListener("click", () => {
-      let gridXZ = 1 / Math.pow(2, parseFloat(document.querySelector("#densxzTxt").value))
-      let gridY = 1 / Math.pow(2, parseFloat(document.querySelector("#densyTxt").value))
-      let rotXZ = Math.pow(2, parseFloat(document.querySelector("#rotxzTxt").value))
-      let rotY = Math.pow(2, parseFloat(document.querySelector("#rotyTxt").value))
-      document.body.innerHTML = `
-        <a-scene>
-          <a-entity include="scenes/_assets.html"></a-entity>
-          <a-entity locomotion="godMode:true" grabber>
-            <a-torus-knot editor="gridSize: ${gridXZ} ${gridY} ${gridXZ};rotationSteps: ${rotXZ} ${rotY} ${rotXZ};" scale=".0625 .0625 .0625" position="0 1 -.25"></a-torus-knot>
-          </a-entity>
-        </a-scene>
-      `
-    })
-
-    let runBtn = document.querySelector("#runBtn")
-    runBtn.addEventListener("click", () => {
-      document.body.innerHTML = `
-        <a-scene>
-          <a-entity include="scenes/_assets.html"></a-entity>
-          <a-entity locomotion grabber></a-entity>
-          <a-entity id="world"></a-entity>
-        </a-scene>
-      `
-      runWhenReady()
-    })
-
-    async function load(url) {
-      txt.blur()
-      let html = await (await fetch(url)).text()
-      localStorage.setItem("#world", html.trim())
-      txt.focus()
-    }
-
-    function runWhenReady() {
-      if (!document.querySelector("a-assets")) {
-        let to = setTimeout(runWhenReady, 256)
-        return
-      }
-      let world = document.querySelector("#world")
-      world.outerHTML = localStorage.getItem("#world")
-    }
-
-  </script>
+  <script src="editor.js"></script>
 </body>
 
 </html>

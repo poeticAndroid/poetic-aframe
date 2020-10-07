@@ -1,48 +1,45 @@
 /* global AFRAME, THREE */
 
 THREE.Vector2._pool = []
-THREE.Vector2.temp = function () {
-  let vec = THREE.Vector2._pool.pop() || new THREE.Vector2()
-  setTimeout(() => {
-    THREE.Vector2._pool.push(vec)
-  })
-  return vec
+THREE.Vector2.reuse = function () {
+  return THREE.Vector2._pool.pop() || new THREE.Vector2()
+}
+THREE.Vector2.prototype.recycle = function () {
+  THREE.Vector2._pool.push(this)
 }
 THREE.Vector3._pool = []
-THREE.Vector3.temp = function () {
-  let vec = THREE.Vector3._pool.pop() || new THREE.Vector3()
-  setTimeout(() => {
-    THREE.Vector3._pool.push(vec)
-  })
-  return vec
+THREE.Vector3.reuse = function () {
+  return THREE.Vector3._pool.pop() || new THREE.Vector3()
 }
+THREE.Vector3.prototype.recycle = function () {
+  THREE.Vector3._pool.push(this)
+}
+
 THREE.Quaternion._pool = []
-THREE.Quaternion.temp = function () {
-  let quat = THREE.Quaternion._pool.pop() || new THREE.Quaternion()
-  setTimeout(() => {
-    THREE.Quaternion._pool.push(quat)
-  })
-  return quat
+THREE.Quaternion.reuse = function () {
+  return THREE.Quaternion._pool.pop() || new THREE.Quaternion()
 }
+THREE.Quaternion.prototype.recycle = function () {
+  THREE.Quaternion._pool.push(this)
+}
+
 THREE.Matrix3._pool = []
-THREE.Matrix3.temp = function () {
-  let mat = THREE.Matrix3._pool.pop() || new THREE.Matrix3()
-  setTimeout(() => {
-    THREE.Matrix3._pool.push(mat)
-  })
-  return mat
+THREE.Matrix3.reuse = function () {
+  return THREE.Matrix3._pool.pop() || new THREE.Matrix3()
+}
+THREE.Matrix3.prototype.recycle = function () {
+  THREE.Matrix3._pool.push(this)
 }
 THREE.Matrix4._pool = []
-THREE.Matrix4.temp = function () {
-  let mat = THREE.Matrix4._pool.pop() || new THREE.Matrix4()
-  setTimeout(() => {
-    THREE.Matrix4._pool.push(mat)
-  })
-  return mat
+THREE.Matrix4.reuse = function () {
+  return THREE.Matrix4._pool.pop() || new THREE.Matrix4()
+}
+THREE.Matrix4.prototype.recycle = function () {
+  THREE.Matrix4._pool.push(this)
 }
 
 AFRAME.AEntity.prototype.copyWorldPosRot = function (srcEl) {
-  let quat = THREE.Quaternion.temp()
+  let quat = THREE.Quaternion.reuse()
   let src = srcEl.object3D
   let dest = this.object3D
   let body = this.body
@@ -62,6 +59,8 @@ AFRAME.AEntity.prototype.copyWorldPosRot = function (srcEl) {
     body.quaternion.copy(quat)
   }
   dest.quaternion.multiply(quat.normalize())
+
+  quat.recycle()
 }
 
 AFRAME.AEntity.prototype.ensurePlayer = function () {

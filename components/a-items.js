@@ -149,9 +149,9 @@
           this._gamepadDelta[7] = gamepad.buttons[7].value > 0.75
         }
       }
-      let pos1 = THREE.Vector3.temp()
-      let pos2 = THREE.Vector3.temp()
-      let delta = THREE.Vector3.temp()
+      let pos1 = THREE.Vector3.reuse()
+      let pos2 = THREE.Vector3.reuse()
+      let delta = THREE.Vector3.reuse()
       for (let hand of this._hands) {
         hand = "_" + hand
         if (this[hand].grabbed) {
@@ -176,6 +176,10 @@
         }
       }
       if (this._wildItem > 0) this._wildItem -= 0.5
+
+      pos1.recycle()
+      pos2.recycle()
+      delta.recycle()
     },
 
     enableHands: function () {

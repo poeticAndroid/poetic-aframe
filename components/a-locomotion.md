@@ -30,7 +30,7 @@ This makes it possible to move around the using the following controls.
 | quantizeMovement | Quantize movement                                                | false   |
 | quantizeRotation | Quantize rotation                                                | true    |
 | teleportDistance | Maximum teleportation distance                                   | 3       |
-| godMode          | Enable ability to move through walls and floors in any direction | false   |
+| godMode          | Enable ability to fly through walls and floors in any direction  | false   |
 
 ### Methods
 
