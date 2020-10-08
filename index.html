@@ -20,8 +20,8 @@
   <link rel="icon" type="image/png"
     href="https://cdn.glitch.com/project-avatar/e956e2ed-f877-4602-a395-a2e234731117.png" />
   <script type="text/javascript" src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
-  <script type="text/javascript"
-    src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
+  <script type="text/javascript" src="https://mixedreality.mozilla.org/ammo.js/builds/ammo.wasm.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
   <script type="text/javascript" src="components/utils.js"></script>
   <script type="text/javascript" src="components/a-locomotion.js"></script>
   <script type="text/javascript" src="components/a-items.js"></script>
@@ -32,7 +32,7 @@
 </head>
 
 <body>
-  <a-scene loading-screen>
+  <a-scene loading-screen physics="driver: ammo;">
     <a-entity include="scenes/_assets.html"></a-entity>
     <a-entity locomotion grabber></a-entity>
     <a-entity include="scenes/demo.html"></a-entity>

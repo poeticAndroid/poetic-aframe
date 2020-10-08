@@ -246,7 +246,7 @@
       this.moveBy(dir.x, 0, dir.y)
       if (this._godMode)
         this.moveBy(this.cameraDir.x * fwd, this.cameraDir.y * fwd, this.cameraDir.z * fwd)
-      
+
       dir.recycle()
       camdir.recycle()
       pivot.recycle()
@@ -377,24 +377,26 @@
 
   AFRAME.registerComponent("floor", {
     schema: {
-      staticBody: { type: "boolean", default: true }
+      physics: { type: "boolean", default: true }
     },
 
     update: function () {
       // Do something when component's data is updated.
-      if (this.data.staticBody && !this.el.getAttribute("static-body"))
-        this.el.setAttribute("static-body", "")
+      if (this.data.physics && !this.el.getAttribute("ammo-body")) this.el.setAttribute("ammo-body", "type: static")
+      if (this.data.physics && !this.el.getAttribute("ammo-shape")) this.el.setAttribute("ammo-shape", "")
+      if (this.data.physics && !this.el.getAttribute("ammo-wait")) this.el.setAttribute("ammo-wait", "")
     }
   })
   AFRAME.registerComponent("wall", {
     schema: {
-      staticBody: { type: "boolean", default: true }
+      physics: { type: "boolean", default: true }
     },
 
     update: function () {
       // Do something when component's data is updated.
-      if (this.data.staticBody && !this.el.getAttribute("static-body"))
-        this.el.setAttribute("static-body", "")
+      if (this.data.physics && !this.el.getAttribute("ammo-body")) this.el.setAttribute("ammo-body", "type: static")
+      if (this.data.physics && !this.el.getAttribute("ammo-shape")) this.el.setAttribute("ammo-shape", "")
+      if (this.data.physics && !this.el.getAttribute("ammo-wait")) this.el.setAttribute("ammo-wait", "")
     }
   })
   AFRAME.registerComponent("start", {
