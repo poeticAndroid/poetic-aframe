@@ -45,9 +45,9 @@
           autoRefresh: false
         }
       })
-      this._head.anchor = this._head.ray.ensure(".items-anchor", "a-entity", { class: "items-anchor" })
-      this._left.anchor = this._left.ray.ensure(".items-anchor", "a-entity", { class: "items-anchor" })
-      this._right.anchor = this._right.ray.ensure(".items-anchor", "a-entity", { class: "items-anchor" })
+      this._head.anchor = this._head.ray.ensure(".items-anchor", "a-box", { class: "items-anchor", visible: "false" })
+      this._left.anchor = this._left.ray.ensure(".items-anchor", "a-box", { class: "items-anchor", visible: "false" })
+      this._right.anchor = this._right.ray.ensure(".items-anchor", "a-box", { class: "items-anchor", visible: "false" })
 
       this.enableHands = this.enableHands.bind(this)
       this._keyDown = this._keyDown.bind(this)
@@ -158,16 +158,15 @@
           this[hand].grabbed.object3D.getWorldPosition(pos1)
           this[hand].grabbed.copyWorldPosRot(this[hand].anchor)
           this[hand].grabbed.object3D.getWorldPosition(pos2)
-          delta
-            .copy(pos2)
-            .sub(pos1)
-            .multiplyScalar(512 / timeDelta)
+          delta.copy(pos2).sub(pos1).multiplyScalar(512 / timeDelta)
 
-          if (this[hand].grabbed.body) {
-            //   this[hand].grabbed.body.sleep()
-            //   this[hand].grabbed.body.velocity.set(delta.x, delta.y, delta.z)
-            //   // this[hand].grabbed.body.angularVelocity.set(0, 0, 0)
+          if (this[hand].grabbed.body && this[hand].grabbed.body.sleep) {
+            this[hand].grabbed.body.sleep()
+            this[hand].grabbed.body.velocity.set(delta.x, delta.y, delta.z)
+            // this[hand].grabbed.body.angularVelocity.set(0, 0, 0)
           }
+          if (this[hand].grabbed.body && this[hand].grabbed.body.activate)
+            this[hand].grabbed.body.activate()
           delta.copy(pos2).sub(pos1)
           if (delta.length() > 1) {
             this._wildItem++
@@ -215,15 +214,13 @@
       if (int) {
         this.dropObject(int.object.el)
         this[hand].grabbed = int.object.el
+        this[hand].anchor.copyWorldPosRot(this[hand].grabbed)
         if (this[hand].grabbed.getAttribute("ammo-body")) {
-          this[hand].grabbedAttrs = this[hand].grabbedAttrs || {}
-          this[hand].grabbedAttrs["ammo-body"] = this[hand].grabbed.getAttribute("ammo-body")
-          this[hand].grabbedAttrs["ammo-shape"] = this[hand].grabbed.getAttribute("ammo-shape")
-          this[hand].grabbed.removeAttribute("ammo-body")
-          this[hand].grabbed.removeAttribute("ammo-shape")
+          this[hand].anchor.setAttribute("ammo-body", "type:kinematic; collisionFilterMask:0;")
+          this[hand].anchor.setAttribute("ammo-shape", "type:box")
+          this[hand].anchor.setAttribute("ammo-constraint", { target: this[hand].grabbed })
         }
         if (this[hand].grabbed.components.grabbable.data.freeOrientation) {
-          this[hand].anchor.copyWorldPosRot(this[hand].grabbed)
           if (hand == "_head") {
             this[hand].anchor.object3D.position.z -= 0.5 - int.distance
             this[hand].anchor.object3D.position.y -= 0.25
@@ -262,14 +259,17 @@
     drop: function (hand = "head") {
       hand = "_" + hand
       if (this[hand].grabbed) {
+        this[hand].anchor.removeAttribute("ammo-constraint")
+        this[hand].anchor.removeAttribute("ammo-shape")
+        this[hand].anchor.removeAttribute("ammo-body")
         if (this[hand].grabbedAttrs) {
           for (let attr in this[hand].grabbedAttrs) {
             this[hand].grabbed.setAttribute(attr, this[hand].grabbedAttrs[attr])
           }
           this[hand].grabbedAttrs = null
         }
-        if (this[hand].grabbed.body) {
-          //   this[hand].grabbed.body.wakeUp()
+        if (this[hand].grabbed.body && this[hand].grabbed.body.wakeUp) {
+          this[hand].grabbed.body.wakeUp()
         }
       }
       this.emit("drop", this[hand].hand, this[hand].grabbed)
