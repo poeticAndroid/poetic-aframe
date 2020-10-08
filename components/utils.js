@@ -47,17 +47,17 @@ AFRAME.AEntity.prototype.copyWorldPosRot = function (srcEl) {
   if (!dest) return
   if (!dest.parent) return
   src.getWorldPosition(dest.position)
-  // if (body) {
-  //   body.position.copy(dest.position)
-  // }
+  if (body && body.position) {
+    body.position.copy(dest.position)
+  }
   dest.parent.worldToLocal(dest.position)
 
   dest.getWorldQuaternion(quat)
   dest.quaternion.multiply(quat.conjugate().normalize())
   src.getWorldQuaternion(quat)
-  // if (body) {
-  //   body.quaternion.copy(quat)
-  // }
+  if (body && body.quaternion) {
+    body.quaternion.copy(quat)
+  }
   dest.quaternion.multiply(quat.normalize())
 
   quat.recycle()
