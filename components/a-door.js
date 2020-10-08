@@ -13,7 +13,7 @@
 
     init: function () {
       this._closedAng = this.el.components.rotation.data.y
-      this._knob = this.el.ensure(".door-knob", "a-box", { class: "door-knob", depth: 0.25, grabbable: { dynamicBody: false }, visible: false })
+      this._knob = this.el.ensure(".door-knob", "a-box", { class: "door-knob", depth: 0.25, grabbable: { physics: false }, visible: false })
       this._grabber = document.querySelector("[grabber]")
 
       this.toggleOpen = this.toggleOpen.bind(this)

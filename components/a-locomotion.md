@@ -53,7 +53,7 @@ Add the `floor` component to any object you want the player to be able to walk o
 
 | Property   | Description                                                  | Default |
 | ---------- | ------------------------------------------------------------ | ------- |
-| staticBody | Whether or not to add `static-body` component automatically. | true    |
+| physics    | Whether or not to add physics components automatically.      | true    |
 
 ## wall
 
@@ -67,7 +67,7 @@ Add the `wall` component to any object you want the player not to be able to wal
 
 | Property   | Description                                                  | Default |
 | ---------- | ------------------------------------------------------------ | ------- |
-| staticBody | Whether or not to add `static-body` component automatically. | true    |
+| physics    | Whether or not to add physics components automatically.      | true    |
 
 ## start
 

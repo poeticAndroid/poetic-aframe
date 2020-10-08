@@ -164,9 +164,9 @@
             .multiplyScalar(512 / timeDelta)
 
           if (this[hand].grabbed.body) {
-            this[hand].grabbed.body.sleep()
-            this[hand].grabbed.body.velocity.set(delta.x, delta.y, delta.z)
-            // this[hand].grabbed.body.angularVelocity.set(0, 0, 0)
+            //   this[hand].grabbed.body.sleep()
+            //   this[hand].grabbed.body.velocity.set(delta.x, delta.y, delta.z)
+            //   // this[hand].grabbed.body.angularVelocity.set(0, 0, 0)
           }
           delta.copy(pos2).sub(pos1)
           if (delta.length() > 1) {
@@ -213,10 +213,15 @@
       ray.refreshObjects()
       let int = ray.intersections[0]
       if (int) {
-        for (let h of this._hands) {
-          if (this["_" + h].grabbed == int.object.el) this.drop(h)
-        }
+        this.dropObject(int.object.el)
         this[hand].grabbed = int.object.el
+        if (this[hand].grabbed.getAttribute("ammo-body")) {
+          this[hand].grabbedAttrs = this[hand].grabbedAttrs || {}
+          this[hand].grabbedAttrs["ammo-body"] = this[hand].grabbed.getAttribute("ammo-body")
+          this[hand].grabbedAttrs["ammo-shape"] = this[hand].grabbed.getAttribute("ammo-shape")
+          this[hand].grabbed.removeAttribute("ammo-body")
+          this[hand].grabbed.removeAttribute("ammo-shape")
+        }
         if (this[hand].grabbed.components.grabbable.data.freeOrientation) {
           this[hand].anchor.copyWorldPosRot(this[hand].grabbed)
           if (hand == "_head") {
@@ -257,8 +262,14 @@
     drop: function (hand = "head") {
       hand = "_" + hand
       if (this[hand].grabbed) {
+        if (this[hand].grabbedAttrs) {
+          for (let attr in this[hand].grabbedAttrs) {
+            this[hand].grabbed.setAttribute(attr, this[hand].grabbedAttrs[attr])
+          }
+          this[hand].grabbedAttrs = null
+        }
         if (this[hand].grabbed.body) {
-          this[hand].grabbed.body.wakeUp()
+          //   this[hand].grabbed.body.wakeUp()
         }
       }
       this.emit("drop", this[hand].hand, this[hand].grabbed)
@@ -300,15 +311,34 @@
       this.useUp(hand, btn)
     }
   })
+  AFRAME.registerComponent("ammo-wait", {
+    init: function () {
+      setTimeout(() => {
+        let body = this.el.getAttribute("ammo-body")
+        let shape = this.el.getAttribute("ammo-shape")
+        this.el.removeAttribute("ammo-body")
+        this.el.removeAttribute("ammo-shape")
+        if (body && this.el.isPlaying) {
+          setTimeout(() => {
+            this.el.setAttribute("ammo-body", body)
+            this.el.setAttribute("ammo-shape", shape)
+          })
+        }
+      })
+      this.el.addEventListener("model-loaded", this.init.bind(this))
+    }
+  })
   AFRAME.registerComponent("grabbable", {
     schema: {
       freeOrientation: { type: "boolean", default: true },
-      dynamicBody: { type: "boolean", default: true }
+      physics: { type: "boolean", default: true }
     },
 
     update: function () {
       // Do something when component's data is updated.
-      if (this.data.dynamicBody && !this.el.getAttribute("dynamic-body")) this.el.setAttribute("dynamic-body", "")
+      if (this.data.physics && !this.el.getAttribute("ammo-body")) this.el.setAttribute("ammo-body", "")
+      if (this.data.physics && !this.el.getAttribute("ammo-shape")) this.el.setAttribute("ammo-shape", "")
+      if (this.data.physics && !this.el.getAttribute("ammo-wait")) this.el.setAttribute("ammo-wait", "")
     }
   })
 }.call(this))

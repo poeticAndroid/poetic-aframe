@@ -44,7 +44,7 @@
     update: function () {
       this._angularSize.set(360, 360, 360).divide(this.data.rotationSteps)
       if (!this.el.getAttribute("grabbable")) this.el.setAttribute("grabbable", {
-        dynamicBody: false,
+        physics: false,
         freeOrientation: false
       })
       if (!this.el.getAttribute("raycaster")) this.el.setAttribute("raycaster", {
@@ -97,11 +97,11 @@
           let anch = this._anchors[i]
           if (grab && grab.copyWorldPosRot) {
             grab.copyWorldPosRot(anch)
-            if (grab.body) {
-              grab.body.sleep()
-              grab.body.velocity.set(0, 0, 0)
-              grab.body.angularVelocity.set(0, 0, 0)
-            }
+            // if (grab.body) {
+            //   grab.body.sleep()
+            //   grab.body.velocity.set(0, 0, 0)
+            //   grab.body.angularVelocity.set(0, 0, 0)
+            // }
           }
         }
 
