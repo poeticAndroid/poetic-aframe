@@ -11,10 +11,15 @@
       this._cameraObj = this._camera.querySelector(".tracker")
       this._leftHand = this.el.querySelector(".left-hand")
       this._rightHand = this.el.querySelector(".right-hand")
+      this._leftGlove = this.el.querySelector(".left-hitbox")
+      this._rightGlove = this.el.querySelector(".right-hitbox")
       this._hands = ["head", "left", "right"]
       this._head = { hand: this._camera }
-      this._left = { hand: this._leftHand }
-      this._right = { hand: this._rightHand }
+      this._left = { hand: this._leftHand, glove: this._leftGlove }
+      this._right = { hand: this._rightHand, glove: this._rightGlove }
+
+
+
 
       this._head.ray = this._camera.ensure(".items-ray", "a-entity", {
         class: "items-ray",
@@ -25,21 +30,19 @@
         }
       })
       let dia = Math.sin(Math.PI / 4)
-      this._left.ray = this._leftHand.ensure(".items-ray", "a-entity", {
+      this._left.ray = this._leftGlove.ensure(".items-ray", "a-entity", {
         class: "items-ray",
         raycaster: {
-          objects: "[grabbable]",
-          far: 0.2,
+          objects: "[grabbable]", far: 0.2,
           origin: { x: -0.0625, y: 0, z: 0.0625 },
           direction: { x: dia, y: 0, z: -dia },
           autoRefresh: false
         }
       })
-      this._right.ray = this._rightHand.ensure(".items-ray", "a-entity", {
+      this._right.ray = this._rightGlove.ensure(".items-ray", "a-entity", {
         class: "items-ray",
         raycaster: {
-          objects: "[grabbable]",
-          far: 0.2,
+          objects: "[grabbable]", far: 0.2,
           origin: { x: 0.0625, y: 0, z: 0.0625 },
           direction: { x: -dia, y: 0, z: -dia },
           autoRefresh: false
@@ -154,6 +157,8 @@
       let delta = THREE.Vector3.reuse()
       for (let hand of this._hands) {
         hand = "_" + hand
+        // if (this[hand].glove)
+        //   this[hand].glove.copyWorldPosRot(this[hand].hand)
         if (this[hand].grabbed) {
           this[hand].grabbed.object3D.getWorldPosition(pos1)
           this[hand].grabbed.copyWorldPosRot(this[hand].anchor)
@@ -188,10 +193,24 @@
         this._leftHand.removeEventListener("buttonchanged", this.enableHands)
         this._rightHand.removeEventListener("buttonchanged", this.enableHands)
         this.hasHands = true
+
+        for (let hand of this._hands) {
+          hand = "_" + hand
+          if (this[hand].glove) {
+            // this[hand].glove.copyWorldPosRot(this[hand].hand)
+            this[hand].glove.setAttribute("ammo-body", "activationState:disableDeactivation")
+            this[hand].glove.setAttribute("ammo-shape", "type:box")
+            // this[hand].glove.setAttribute("ammo-wait", "")
+            this[hand].hand.setAttribute("ammo-body", "type:kinematic; collisionFilterMask:0;")
+            this[hand].hand.setAttribute("ammo-shape", "type:box")
+            this[hand].hand.setAttribute("ammo-constraint", { target: this[hand].glove })
+          }
+        }
       }
     },
     emit: function (eventtype, hand, grabbed, e = {}) {
       e.grabber = this.el
+      e.grabbedElement = grabbed
       e.handElement = hand
       for (let _hand of this._hands) {
         if (this["_" + _hand].hand === hand) e.hand = _hand
@@ -230,7 +249,10 @@
           else this[hand].anchor.object3D.position.set(0, 0, 0)
           this[hand].anchor.object3D.quaternion.set(0, 0, 0, 1)
         }
-        if (hand != "_head") this[hand].hand.object3D.visible = false
+        if (this[hand].glove) {
+          this[hand].glove.setAttribute("ammo-body", "collisionFilterMask", 0)
+          this[hand].hand.object3D.visible = false
+        }
       }
       this.emit("grab", this[hand].hand, this[hand].grabbed)
     },
@@ -274,7 +296,10 @@
       }
       this.emit("drop", this[hand].hand, this[hand].grabbed)
       this[hand].grabbed = null
-      if (hand != "_head") this[hand].hand.object3D.visible = true
+      if (this[hand].glove) {
+        this[hand].glove.setAttribute("ammo-body", "collisionFilterMask", 1)
+        this[hand].hand.object3D.visible = true
+            }
     },
     dropObject: function (el) {
       for (let hand of this._hands) {
