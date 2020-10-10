@@ -66,8 +66,17 @@ AFRAME.AEntity.prototype.copyWorldPosRot = function (srcEl) {
 AFRAME.AEntity.prototype.ensurePlayer = function () {
   let cam = this.ensure("a-camera", "a-camera", { "look-controls": { pointerLockEnabled: true } })
   cam.ensure(".tracker", "a-entity", { class: "tracker" })
-  this.ensure(".left-hand", "a-entity", { "class": "left-hand", "hand-controls": { hand: "left" } })
-  this.ensure(".right-hand", "a-entity", { "class": "right-hand", "hand-controls": { hand: "right" } })
+  let boxsize = 0.0625
+  let leftHand = this.ensure(".left-hand", "a-entity", { "class": "left-hand" })
+  let leftHitbox = leftHand.ensure(".left-hitbox", "a-box", { class: "left-hitbox", color: "red", width: boxsize/2, height: boxsize, depth: boxsize })
+  let leftGlove = leftHitbox.ensure(".left-glove", "a-entity", { "class": "left-glove" })
+  let rightHand = this.ensure(".right-hand", "a-entity", { "class": "right-hand" })
+  let rightHitbox = rightHand.ensure(".right-hitbox", "a-box", { class: "right-hitbox", color: "red", width: boxsize/2, height: boxsize, depth: boxsize })
+  let rightGlove = rightHitbox.ensure(".right-glove", "a-entity", { "class": "right-glove" })
+  setTimeout(() => {
+    leftHand.setAttribute("hand-controls", { hand: "left", handEntity: leftGlove })
+    rightHand.setAttribute("hand-controls", { hand: "right", handEntity: rightGlove })
+  }, 256)
 }
 
 Element.prototype.ensure = function (selector, name = selector, attrs = {}) {
