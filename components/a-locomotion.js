@@ -14,11 +14,14 @@
 
     init: function () {
       // Do something when component first attached.
-      this.playCenter = new THREE.Vector3()
-      this.playerPos = new THREE.Vector3()
-      this.safePos = new THREE.Vector3()
-      this.cameraPos = new THREE.Vector3()
-      this.cameraDir = new THREE.Vector3()
+      this.playCenter = new THREE.Vector3() // Center/origin of VR playarea
+      this.playerPos = new THREE.Vector3() // position of camera projected down onto the floor
+      this.feetPos = new THREE.Vector3() // position of player's dragging feet
+      this.safeHeadPos = new THREE.Vector3() // last known safe position of player's head
+      this.safeFeetPos = new THREE.Vector3() // last known safe position of player's feet
+      this.cameraPos = new THREE.Vector3() // position of camera
+      this.cameraDir = new THREE.Vector3() // direction of camera
+      this.angle = 0
       this.floorOffset = 0
 
       this.el.ensurePlayer()
@@ -42,6 +45,11 @@
       this._bumper = this._vehicle.ensure(".locomotion-bumper", "a-entity", {
         class: "locomotion-bumper",
         raycaster: { autoRefresh: false, direction: { x: 1, y: 0, z: 0 }, far: 1, objects: "[wall]" }
+      })
+      this._helmet = this.el.ensure(".locomotion-helmet", "a-entity", {
+        class: "locomotion-helmet",
+        position: { x: 0, y: 1.5, z: 0 },
+        raycaster: { autoRefresh: false, direction: { x: 1, y: 0, z: 0 }, far: 1, objects: "[wall], [floor]" }
       })
 
       this.enableHands = this.enableHands.bind(this)
@@ -105,10 +113,20 @@
       this.playerPos.set(this.cameraPos.x, this.playCenter.y - this.floorOffset, this.cameraPos.z)
       if (this.cameraPos.y < this.playerPos.y) this.toggleCrouch()
 
-      delta.set(this.safePos.x - this.playerPos.x, this.safePos.y - this.playerPos.y, this.safePos.z - this.playerPos.z)
+      delta.set(this._camera.object3D.position.x - this._vehicle.object3D.position.x, 0, this._camera.object3D.position.z - this._vehicle.object3D.position.z)
+      if (delta.length() > 0.5) this._vehicle.object3D.position.add(delta.multiplyScalar(0.1))
+      this._vehicle.object3D.getWorldPosition(this.feetPos)
+      this.feetPos.y = this.playerPos.y
+
+      delta.set(this.safeFeetPos.x - this.feetPos.x, this.safeFeetPos.y - this.feetPos.y, this.safeFeetPos.z - this.feetPos.z)
       this._bumper.object3D.position.copy(delta)
       this._bumper.setAttribute("raycaster", "far", delta.length() + 0.125)
       this._bumper.setAttribute("raycaster", "direction", delta.multiplyScalar(-1).normalize())
+
+      delta.set(this.cameraPos.x - this.safeHeadPos.x, this.cameraPos.y - this.safeHeadPos.y, this.cameraPos.z - this.safeHeadPos.z)
+      this.el.object3D.worldToLocal(this._helmet.object3D.position.copy(this.safeHeadPos))
+      this._helmet.setAttribute("raycaster", "far", delta.length() + 0.125)
+      this._helmet.setAttribute("raycaster", "direction", delta.normalize())
 
       if (!this._godMode) {
         this._vehicle.components.raycaster.refreshObjects()
@@ -128,13 +146,31 @@
             .applyMatrix3(matrix)
             .normalize()
             .multiplyScalar(0.25)
-            .add(int.point)
-          this.moveTo(delta.x, this.safePos.y, delta.z, true)
-        } else {
-          this.safePos.lerp(this.playerPos, 0.125)
+          this.playCenter.add(delta)
+          this.playerPos.add(delta)
+          this.cameraPos.add(delta)
+          this.feetPos.add(delta)
+          this.el.object3D.position.add(delta)
         }
+        this.safeFeetPos.lerp(this.feetPos, 0.125)
+        
+        this._helmet.setAttribute("raycaster", "autoRefresh", false)
+        this._helmet.components.raycaster.refreshObjects()
+        if (this._helmet.components.raycaster.intersections[0]) {
+          let int = this._helmet.components.raycaster.intersections[0]
+          matrix.getNormalMatrix(int.object.el.object3D.matrixWorld)
+          delta
+            .copy(int.face.normal)
+            .applyMatrix3(matrix)
+            .normalize()
+            .multiplyScalar(0.25)
+          if (Math.abs(delta.y) > Math.abs(delta.x) && Math.abs(delta.y) > Math.abs(delta.z))
+            this.toggleCrouch()
+          else
+            this.moveBy(delta.x, delta.y, delta.z, true)
+        }
+        this.safeHeadPos.lerp(this.cameraPos, 0.125)
       }
-      this._vehicle.object3D.position.set(this._camera.object3D.position.x, this._vehicle.object3D.position.y, this._camera.object3D.position.z)
 
       camdir.set(this.cameraDir.z, -this.cameraDir.x)
 
@@ -219,14 +255,14 @@
           if (int && int.object.el.getAttribute("floor") != null && int.point.y < this.playerPos.y + 1.5) {
             // teleport!
             if (this.playerPos.distanceTo(int.point) <= this.data.teleportDistance) {
-              this.moveTo(int.point.x, int.point.y, int.point.z)
+              this.moveTo(int.point.x, int.point.y, int.point.z, false, true)
             } else {
               delta.copy(int.point).sub(this.playerPos)
               delta
                 .normalize()
                 .multiplyScalar(this.data.teleportDistance)
                 .add(this.playerPos)
-              this.moveTo(delta.x, delta.y, delta.z)
+              this.moveTo(delta.x, delta.y, delta.z, false, true)
             }
           }
         }
@@ -242,7 +278,7 @@
       if (this._godMode) dir.y = 0
       pivot.set(0, 0)
       dir.rotateAround(pivot, camdir.angle())
-      this.rotateBy(rot * rk)
+      if (rot) this.rotateBy(rot * rk)
       this.moveBy(dir.x, 0, dir.y)
       if (this._godMode)
         this.moveBy(this.cameraDir.x * fwd, this.cameraDir.y * fwd, this.cameraDir.z * fwd)
@@ -254,26 +290,46 @@
       matrix.recycle()
     },
 
-    moveBy: function (x, y, z, safe) {
+    moveBy: function (x, y, z, safe, stand) {
       let delta = THREE.Vector3.reuse()
+      let delta2 = THREE.Vector2.reuse()
+      let pivot = THREE.Vector2.reuse()
       delta.set(x, y, z)
+      delta2.set(-x, -z)
+      pivot.set(0, 0)
+      delta2.rotateAround(pivot, this.angle)
+
+      let feetY = this._vehicle.object3D.position.y
+      this._vehicle.object3D.position.x += delta2.x
+      this._vehicle.object3D.position.z += delta2.y
 
       this.playCenter.add(delta)
       this.playerPos.add(delta)
       this.cameraPos.add(delta)
       this.el.object3D.position.add(delta)
-      if (safe || this._godMode) this.safePos.copy(this.playerPos)
+      if (safe || this._godMode) {
+        this.safeFeetPos.copy(this.playerPos)
+        this.safeHeadPos.copy(this.cameraPos)
+      }
+      if (stand || this._godMode) {
+        this._vehicle.object3D.position.copy(this._camera.object3D.position)
+      }
+      this._vehicle.object3D.position.y = feetY
 
       delta.recycle()
+      delta2.recycle()
+      pivot.recycle()
     },
-    moveTo: function (x, y, z, safe) {
-      this.moveBy(x - this.playerPos.x, y - this.playerPos.y, z - this.playerPos.z, safe)
+    moveTo: function (x, y, z, safe, stand) {
+      this.moveBy(x - this.playerPos.x, y - this.playerPos.y, z - this.playerPos.z, safe, stand)
     },
 
     rotateBy: function (angle) {
       let pos = THREE.Vector2.reuse()
       let pivot = THREE.Vector2.reuse()
       let delta = THREE.Vector3.reuse()
+      this.moveTo(this.feetPos.x, this.feetPos.y, this.feetPos.z)
+
       pos.set(this.playerPos.x, this.playerPos.z)
       pivot.set(this.playCenter.x, this.playCenter.z)
       pos.rotateAround(pivot, -angle)
@@ -283,6 +339,9 @@
       this._vehicle.object3D.rotateY(-angle)
       this.el.object3D.position.add(delta)
       this.playCenter.add(delta)
+      this.angle += angle
+      if (this.angle > Math.PI) this.angle -= Math.PI * 2
+      if (this.angle < -Math.PI) this.angle += Math.PI * 2
 
       pos.recycle()
       pivot.recycle()
@@ -410,7 +469,7 @@
       // loco.moveTo(pos.x, pos.y, pos.z, true)
 
       setTimeout(() => {
-        loco.moveTo(pos.x, pos.y + 1, pos.z, true)
+        loco.moveTo(pos.x, pos.y + 1, pos.z, true, true)
         setTimeout(() => {
           if (loco.floorOffset) {
             loco.toggleCrouch()
