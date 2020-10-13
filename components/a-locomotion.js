@@ -153,7 +153,7 @@
           this.el.object3D.position.add(delta)
         }
         this.safeFeetPos.lerp(this.feetPos, 0.125)
-        
+
         this._helmet.setAttribute("raycaster", "autoRefresh", false)
         this._helmet.components.raycaster.refreshObjects()
         if (this._helmet.components.raycaster.intersections[0]) {
@@ -164,10 +164,12 @@
             .applyMatrix3(matrix)
             .normalize()
             .multiplyScalar(0.25)
-          if (Math.abs(delta.y) > Math.abs(delta.x) && Math.abs(delta.y) > Math.abs(delta.z))
-            this.toggleCrouch()
-          else
+          if (Math.abs(delta.y) > Math.abs(delta.x) && Math.abs(delta.y) > Math.abs(delta.z)) {
+            this.floorOffset += delta.y
+            this._vehicle.object3D.position.y = 0.5 - this.floorOffset
+          } else {
             this.moveBy(delta.x, delta.y, delta.z, true)
+          }
         }
         this.safeHeadPos.lerp(this.cameraPos, 0.125)
       }

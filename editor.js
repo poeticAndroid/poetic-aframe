@@ -47,7 +47,7 @@ editBtn.addEventListener("click", () => {
 let runBtn = document.querySelector("#runBtn")
 runBtn.addEventListener("click", () => {
   document.body.innerHTML = `
-    <a-scene physics="driver: ammo; debug: true; debugDrawMode: 1;">
+    <a-scene physics="driver: ammo">
       <a-entity include="scenes/_assets.html"></a-entity>
       <a-entity locomotion grabber></a-entity>
       <a-entity id="world"></a-entity>
