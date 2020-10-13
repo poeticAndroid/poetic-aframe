@@ -67,12 +67,12 @@ AFRAME.AEntity.prototype.ensurePlayer = function () {
   let cam = this.ensure("a-camera", "a-camera", { "look-controls": { pointerLockEnabled: true } })
   cam.ensure(".tracker", "a-entity", { class: "tracker" })
   let boxsize = 0.0625
-  let leftHand = this.ensure(".left-hand", "a-entity", { "class": "left-hand" })
-  let leftHitbox = leftHand.ensure(".left-hitbox", "a-box", { class: "left-hitbox", color: "red", width: boxsize/2, height: boxsize, depth: boxsize })
-  let leftGlove = leftHitbox.ensure(".left-glove", "a-entity", { "class": "left-glove" })
-  let rightHand = this.ensure(".right-hand", "a-entity", { "class": "right-hand" })
-  let rightHitbox = rightHand.ensure(".right-hitbox", "a-box", { class: "right-hitbox", color: "red", width: boxsize/2, height: boxsize, depth: boxsize })
-  let rightGlove = rightHitbox.ensure(".right-glove", "a-entity", { "class": "right-glove" })
+  let leftHand = this.ensure(".left-hand", "a-entity", { class: "left-hand" })
+  let leftHitbox = leftHand.ensure(".left-hitbox", "a-box", { class: "left-hitbox", position: "0 -0 0.0625", material: "visible:false", width: boxsize / 2, height: boxsize, depth: boxsize * 2 })
+  let leftGlove = leftHitbox.ensure(".left-glove", "a-entity", { class: "left-glove", position: "0 0 -0.0625" })
+  let rightHand = this.ensure(".right-hand", "a-entity", { class: "right-hand" })
+  let rightHitbox = rightHand.ensure(".right-hitbox", "a-box", { class: "right-hitbox", position: "0 -0 0.0625", material: "visible:false", width: boxsize / 2, height: boxsize, depth: boxsize * 2 })
+  let rightGlove = rightHitbox.ensure(".right-glove", "a-entity", { class: "right-glove", position: "0 0 -0.0625" })
   setTimeout(() => {
     leftHand.setAttribute("hand-controls", { hand: "left", handEntity: leftGlove })
     rightHand.setAttribute("hand-controls", { hand: "right", handEntity: rightGlove })

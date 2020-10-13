@@ -2,7 +2,9 @@
 
 ; (function () {
   AFRAME.registerComponent("grabber", {
-    schema: {},
+    schema: {
+      hideOnGrab: { type: "boolean", default: false }
+    },
 
     init: function () {
       // Do something when component first attached.
@@ -17,9 +19,6 @@
       this._head = { hand: this._camera }
       this._left = { hand: this._leftHand, glove: this._leftGlove }
       this._right = { hand: this._rightHand, glove: this._rightGlove }
-
-
-
 
       this._head.ray = this._camera.ensure(".items-ray", "a-entity", {
         class: "items-ray",
@@ -251,7 +250,8 @@
         }
         if (this[hand].glove) {
           this[hand].glove.setAttribute("ammo-body", "collisionFilterMask", 0)
-          this[hand].hand.object3D.visible = false
+          if (this.hideOnGrab)
+            this[hand].hand.object3D.visible = false
         }
       }
       this.emit("grab", this[hand].hand, this[hand].grabbed)
@@ -299,7 +299,7 @@
       if (this[hand].glove) {
         this[hand].glove.setAttribute("ammo-body", "collisionFilterMask", 1)
         this[hand].hand.object3D.visible = true
-            }
+      }
     },
     dropObject: function (el) {
       for (let hand of this._hands) {
