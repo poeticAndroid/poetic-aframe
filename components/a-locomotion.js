@@ -60,6 +60,9 @@
       this._keyUp = this._keyUp.bind(this)
       this._fireDown = this._fireDown.bind(this)
       this._fireUp = this._fireUp.bind(this)
+      this._turnLeft = this._turnLeft.bind(this)
+      this._turnRight = this._turnRight.bind(this)
+      this._getBackUp = this._getBackUp.bind(this)
       this._rightHand.addEventListener("buttonchanged", this.enableHands)
       this._leftHand.addEventListener("axismove", this._axisMove)
       this._leftHand.addEventListener("buttonchanged", this._buttonChanged)
@@ -68,6 +71,8 @@
       this._rightHand.addEventListener("buttonchanged", this.enableHands)
       addEventListener("keydown", this._keyDown)
       addEventListener("keyup", this._keyUp)
+      document.querySelector("canvas").addEventListener("swipeleft", this._turnLeft)
+      document.querySelector("canvas").addEventListener("swiperight", this._turnRight)
       document.querySelector("canvas").addEventListener("swipedown", this.toggleCrouch)
       document.querySelector("canvas").addEventListener("swipeup", this._fireDown)
       document.querySelector("canvas").addEventListener("touchend", this._fireUp)
@@ -75,6 +80,7 @@
       this._nextMove = 0
       this._targetDir = 0
       this._alt = 0
+      this._lastFloorPos = new THREE.Vector3()
     },
 
     update: function () {
@@ -94,6 +100,9 @@
       this._rightHand.removeEventListener("buttonchanged", this.enableHands)
       removeEventListener("keydown", this._keyDown)
       removeEventListener("keyup", this._keyUp)
+      document.querySelector("canvas").removeEventListener("swipeleft", this._turnLeft)
+      document.querySelector("canvas").removeEventListener("swiperight", this._turnRight)
+      document.querySelector("canvas").removeEventListener("swipedown", this.toggleCrouch)
       document.querySelector("canvas").removeEventListener("swipeup", this._fireDown)
       document.querySelector("canvas").removeEventListener("touchend", this._fireUp)
     },
@@ -131,10 +140,22 @@
       if (!this._godMode) {
         this._vehicle.components.raycaster.refreshObjects()
         if (this._vehicle.components.raycaster.intersections[0]) {
-          let p = this._vehicle.components.raycaster.intersections[0].point
+          let int = this._vehicle.components.raycaster.intersections[0]
+          let p = int.point
           this.moveTo(this.playerPos.x, Math.max(p.y, this.playerPos.y - 0.1), this.playerPos.z)
+          if (this._lastFloor == int.object.el) {
+            delta.copy(this._lastFloor.object3D.position).sub(this._lastFloorPos)
+            this.playCenter.add(delta)
+            this.playerPos.add(delta)
+            this.cameraPos.add(delta)
+            this.feetPos.add(delta)
+            this.el.object3D.position.add(delta)
+          }
+          this._lastFloor = int.object.el
+          this._lastFloorPos.copy(this._lastFloor.object3D.position)
         } else {
           this.moveTo(this.playerPos.x, this.playerPos.y - 0.1, this.playerPos.z)
+          this._lastFloor = null
         }
         this._bumper.setAttribute("raycaster", "autoRefresh", false)
         this._bumper.components.raycaster.refreshObjects()
@@ -167,6 +188,7 @@
           if (Math.abs(delta.y) > Math.abs(delta.x) && Math.abs(delta.y) > Math.abs(delta.z)) {
             this.floorOffset += delta.y
             this._vehicle.object3D.position.y = 0.5 - this.floorOffset
+            setTimeout(this._getBackUp, 10000)
           } else {
             this.moveBy(delta.x, delta.y, delta.z, true)
           }
@@ -403,6 +425,17 @@
       }
     },
 
+    _turnLeft: function (e) {
+      this._axes = this._axes || [0, 0, 0, 0]
+      this._alt = this._alt || 0
+      this._axes[2] = -1
+    },
+    _turnRight: function (e) {
+      this._axes = this._axes || [0, 0, 0, 0]
+      this._alt = this._alt || 0
+      this._axes[2] = 1
+    },
+
     _fireDown: function (e) {
       this._axes = this._axes || [0, 0, 0, 0]
       this._alt = this._alt || 0
@@ -412,6 +445,7 @@
     _fireUp: function (e) {
       this._axes = this._axes || [0, 0, 0, 0]
       this._alt = this._alt || 0
+      this._axes[2] = 0
       this._axes[3] = 0
     },
 
@@ -433,6 +467,10 @@
       if (e.code == "Space" && this._axes) {
         this._axes[3] = 0
       }
+    },
+
+    _getBackUp: function (e) {
+      if (this.floorOffset) this.toggleCrouch()
     }
   })
 

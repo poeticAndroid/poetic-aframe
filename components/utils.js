@@ -64,7 +64,7 @@ AFRAME.AEntity.prototype.copyWorldPosRot = function (srcEl) {
 }
 
 AFRAME.AEntity.prototype.ensurePlayer = function () {
-  let cam = this.ensure("a-camera", "a-camera", { "look-controls": { pointerLockEnabled: true } })
+  let cam = this.ensure("a-camera", "a-camera", { "look-controls": { pointerLockEnabled: true, touchEnabled: false } })
   cam.ensure(".tracker", "a-entity", { class: "tracker" })
   let boxsize = 0.0625
   let leftHand = this.ensure(".left-hand", "a-entity", { class: "left-hand" })
