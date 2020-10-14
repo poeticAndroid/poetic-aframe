@@ -242,6 +242,7 @@
           if (hand == "_head") {
             this[hand].anchor.object3D.position.z -= 0.5 - int.distance
             this[hand].anchor.object3D.position.y -= 0.25
+            this[hand].anchor.object3D.quaternion.set(0, 0, 0, 1)
           }
         } else {
           if (hand == "_head") this[hand].anchor.object3D.position.set(0, -0.25, -0.5)
