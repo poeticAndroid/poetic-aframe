@@ -44,7 +44,7 @@
       })
       this._bumper = this._vehicle.ensure(".locomotion-bumper", "a-entity", {
         class: "locomotion-bumper",
-        raycaster: { autoRefresh: false, direction: { x: 1, y: 0, z: 0 }, far: 1, objects: "[wall]" }
+        raycaster: { autoRefresh: false, direction: { x: 1, y: 0, z: 0 }, far: 1, objects: "[wall]", showLine: true }
       })
       this._helmet = this.el.ensure(".locomotion-helmet", "a-entity", {
         class: "locomotion-helmet",
@@ -130,12 +130,12 @@
       delta.set(this.safeFeetPos.x - this.feetPos.x, this.safeFeetPos.y - this.feetPos.y, this.safeFeetPos.z - this.feetPos.z)
       this._bumper.object3D.position.copy(delta)
       this._bumper.setAttribute("raycaster", "far", delta.length() + 0.125)
-      this._bumper.setAttribute("raycaster", "direction", delta.multiplyScalar(-1).normalize())
+      this._bumper.setAttribute("raycaster", "direction", AFRAME.utils.coordinates.stringify( delta.multiplyScalar(-1).normalize()))
 
       delta.set(this.cameraPos.x - this.safeHeadPos.x, this.cameraPos.y - this.safeHeadPos.y, this.cameraPos.z - this.safeHeadPos.z)
       this.el.object3D.worldToLocal(this._helmet.object3D.position.copy(this.safeHeadPos))
       this._helmet.setAttribute("raycaster", "far", delta.length() + 0.125)
-      this._helmet.setAttribute("raycaster", "direction", delta.normalize())
+      this._helmet.setAttribute("raycaster", "direction", AFRAME.utils.coordinates.stringify( delta.normalize()))
 
       if (!this._godMode) {
         this._vehicle.components.raycaster.refreshObjects()
@@ -157,7 +157,7 @@
           this.moveTo(this.playerPos.x, this.playerPos.y - 0.1, this.playerPos.z)
           this._lastFloor = null
         }
-        this._bumper.setAttribute("raycaster", "autoRefresh", false)
+
         this._bumper.components.raycaster.refreshObjects()
         if (this._bumper.components.raycaster.intersections[0]) {
           let int = this._bumper.components.raycaster.intersections[0]
@@ -172,10 +172,10 @@
           this.cameraPos.add(delta)
           this.feetPos.add(delta)
           this.el.object3D.position.add(delta)
-        }
-        this.safeFeetPos.lerp(this.feetPos, 0.125)
+          console.log("ow!")
+        } 
+          this.safeFeetPos.lerp(this.feetPos, 0.125)
 
-        this._helmet.setAttribute("raycaster", "autoRefresh", false)
         this._helmet.components.raycaster.refreshObjects()
         if (this._helmet.components.raycaster.intersections[0]) {
           let int = this._helmet.components.raycaster.intersections[0]
@@ -192,8 +192,9 @@
           } else {
             this.moveBy(delta.x, delta.y, delta.z, true)
           }
-        }
-        this.safeHeadPos.lerp(this.cameraPos, 0.125)
+          console.log("oof!")
+        } 
+          this.safeHeadPos.lerp(this.cameraPos, 0.125)
       }
 
       camdir.set(this.cameraDir.z, -this.cameraDir.x)
