@@ -44,7 +44,7 @@
       })
       this._bumper = this._vehicle.ensure(".locomotion-bumper", "a-entity", {
         class: "locomotion-bumper",
-        raycaster: { autoRefresh: false, direction: { x: 1, y: 0, z: 0 }, far: 1, objects: "[wall]", showLine: true }
+        raycaster: { autoRefresh: false, direction: { x: 1, y: 0, z: 0 }, far: 1, objects: "[wall]" }
       })
       this._helmet = this.el.ensure(".locomotion-helmet", "a-entity", {
         class: "locomotion-helmet",
@@ -172,7 +172,6 @@
           this.cameraPos.add(delta)
           this.feetPos.add(delta)
           this.el.object3D.position.add(delta)
-          console.log("ow!")
         } 
           this.safeFeetPos.lerp(this.feetPos, 0.125)
 
@@ -192,7 +191,6 @@
           } else {
             this.moveBy(delta.x, delta.y, delta.z, true)
           }
-          console.log("oof!")
         } 
           this.safeHeadPos.lerp(this.cameraPos, 0.125)
       }
